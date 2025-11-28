@@ -39,5 +39,5 @@ I am a self-taught Cybersecurity Blue Team Trainee on a mission to reach the top
 
 ### 📊 Security Stats
 <p align="left">
-<img src="https://github-readme-stats.vercel.app/api?username=your-username&show_icons=true&theme=radical" alt="GitHub Stats" height="150" />
+<img src="https://github-readme-stats.vercel.app/api?username=abisinraj&show_icons=true&theme=radical" alt="GitHub Stats" height="150" />
 </p>
