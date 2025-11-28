@@ -1,58 +1,149 @@
-<div align="center">
+<!-- Full Page Multi-Layer Glass Layout | White & Gold | True Left Alignment -->
 
-<img src="https://readme-typing-svg.herokuapp.com/?font=Roboto+Mono&size=30&duration=4000&color=38BDF8&center=true&vCenter=true&width=600&height=70&lines=🛡️+Blue+Team+Operator;🔍+Security+Researcher;🐍+Python+Tool+Dev;⚡+Flow+Architect" alt="Animated Header" />
+<div style="
+    width:100%;
+    padding:60px 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.3));
+    backdrop-filter: blur(16px);
+">
 
-> **"To open the door, you have to make the door itself."**
+<!-- Main Intro Glass -->
+<div style="
+    max-width:900px;
+    padding:40px;
+    background: rgba(255,255,255,0.08);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(18px);
+    margin:auto;
+    text-align:left;
+">
 
-<br />
+<h1 style="color:white; font-weight:500; letter-spacing:0.3px;">
+Student Researcher · Independent Security Learner
+</h1>
 
-<table>
+<p style="font-size:15px; color:#d6bb6a; max-width:760px; line-height:1.7;">
+I study cybersecurity through self learning, structured practice, and experiments on my own systems.  
+I focus on understanding how attacks behave, writing minimal tools, and verifying concepts with real logs and traffic.  
+My approach is simple. Learn the fundamentals, test everything, improve through repetition.
+</p>
+
+</div>
+
+
+
+<!-- Stats Glass Card -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    background: rgba(255,255,255,0.06);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(14px);
+    margin:auto;
+    text-align:left;
+">
+
+<h2 style="color:#ffffff; font-weight:500;">
+Statistics
+</h2>
+
+<table style="width:100%; text-align:left;">
   <tr>
-    <td width="50%">
-      <img height="165em" src="https://github-readme-stats.vercel.app/api?username=abisinraj&show_icons=true&theme=radical&hide_border=true&include_all_commits=true&count_private=true&cache_seconds=0" />
+    <td width="50%" style="text-align:left;">
+      <img height="170em" src="https://github-readme-stats.vercel.app/api?username=abisinraj&show_icons=true&hide_border=true&theme=transparent&title_color=d6bb6a&text_color=ffffff&icon_color=d6bb6a" />
     </td>
-    <td width="50%">
-      <img height="165em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=abisinraj&layout=compact&theme=radical&hide_border=true&langs_count=6" />
+    <td width="50%" style="text-align:left;">
+      <img height="170em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=abisinraj&layout=compact&hide_border=true&theme=transparent&title_color=d6bb6a&text_color=ffffff" />
     </td>
   </tr>
 </table>
 
-<img height="160em" src="https://github-readme-streak-stats.herokuapp.com/?user=abisinraj&theme=radical&hide_border=true&background=0D1117" />
-
-<br />
-<br />
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
-
-<br />
-
-### 🚀 **Featured Project: FLOW | Custom SIEM & Threat Hunting**
-
-**Engineering detection logic from the ground up to master the art of defense.**
+<div style="margin-top:20px; text-align:left;">
+  <img height="155em" src="https://github-readme-streak-stats.herokuapp.com/?user=abisinraj&theme=transparent&hide_border=true&ring=d6bb6a&fire=d6bb6a&currStreakLabel=d6bb6a&sideNums=ffffff&sideLabels=aaaaaa" />
+</div>
 
 </div>
 
----
 
-### 🧠 **Project Philosophy**
 
-<p align="center">
-  <i>FLOW is not just a tool; it's my research platform. By building a SIEM's core components manually, I deconstruct modern attacks to engineer more effective defenses.</i>
+<!-- FLOW Overview Glass -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    background: rgba(255,255,255,0.08);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(16px);
+    margin:auto;
+    text-align:left;
+">
+
+<h2 style="color:#ffffff; font-weight:500;">
+FLOW · Custom SIEM and Threat Analysis Framework
+</h2>
+
+<p style="color:#d6bb6a; line-height:1.7; max-width:780px;">
+FLOW is a personal research environment for learning detection engineering.  
+Every part is written manually to understand monitoring, correlation, and response at a low level.  
+The framework provides a structured space for analyzing attacker behavior and improving defensive logic.
 </p>
 
-### 🔍 **Detection Capabilities**
+</div>
 
-<div align="center">
 
-| **🚨 Active Threat Detection** | **🔍 Forensic & Static Analysis** |
-|:-------------------------------|:----------------------------------|
-| • MITM & Tunneling | • File Integrity (SHA-256) |
-| • Reverse Shell Patterns | • Fuzzy Hashing |
-| • Brute Force Heuristics | • Signature Database Matching |
+
+<!-- Capabilities Glass -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    background: rgba(255,255,255,0.06);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    margin:auto;
+    text-align:left;
+">
+
+<h2 style="color:#ffffff; font-weight:500;">
+Detection Capabilities
+</h2>
+
+<div style="margin-top:12px; text-align:left;">
+
+| Network Detection | Forensic Analysis |
+|------------------|------------------|
+| MITM identification | SHA 256 integrity checks |
+| Tunneling analysis | Fuzzy hashing (ssdeep) |
+| Reverse shell behavior | Signature comparison |
+| Brute force heuristics | File behavior examination |
 
 </div>
 
-### 🛠️ **Technical Implementation**
+</div>
+
+
+
+<!-- Implementation Glass -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    background: rgba(255,255,255,0.05);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    margin:auto;
+    text-align:left;
+">
+
+<h2 style="color:#ffffff; font-weight:500;">
+Technical Implementation Example
+</h2>
 
 ```python
 #!/usr/bin/env python3
@@ -68,17 +159,6 @@ from core.alert_engine import AlertEngine
 
 class PolymorphicDetector:
     def __init__(self, malware_db):
-        """
-        malware_db structure:
-        {
-            "<ssdeep_hash>": {
-                "family": "MalwareFamilyName",
-                "severity": "high",
-                "source": "local-db"
-            },
-            ...
-        }
-        """
         self.malware_db = malware_db
         self.alert = AlertEngine()
 
@@ -127,44 +207,73 @@ class PolymorphicDetector:
         }
 ```
 
----
+</div>
 
-### 🧰 **Operational Arsenal**
 
-<div align="center">
 
-<img src="https://skillicons.dev/icons?i=python,bash,linux,git,mysql" /><br />
-**Core Stack**
+<!-- Skills Glass -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    background: rgba(255,255,255,0.04);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    margin:auto;
+    text-align:left;
+">
 
-<img src="https://img.shields.io/badge/Security-Blue_Team-111111?style=for-the-badge&logo=hackthebox&logoColor=green" />
-<img src="https://img.shields.io/badge/Network-Wireshark-1679A7?style=for-the-badge&logo=wireshark&logoColor=white" />
-<img src="https://img.shields.io/badge/Defense-SIEM_Dev-FF6B6B?style=for-the-badge&logo=elasticstack&logoColor=white" />
+<h2 style="color:#ffffff; font-weight:500;">
+Technical Stack
+</h2>
+
+<div style="margin-top:10px;">
+<img src="https://skillicons.dev/icons?i=python,bash,linux,git,mysql&theme=light" />
+</div>
+
+<p style="color:#d6bb6a; font-size:14px; margin-top:10px; max-width:780px;">
+Focused on network defense, log analysis, malware behavior, and Python tooling for investigation and monitoring.
+</p>
 
 </div>
 
-**Core Competencies:**
 
-* 🛡️ Defensive Engineering
-* 🔬 Malware Analysis
-* 🌐 Network Forensics
 
----
+<!-- Contact Glass -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    margin-bottom:60px;
+    background: rgba(255,255,255,0.05);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    margin:auto;
+    text-align:left;
+">
 
-### 📫 **Connect & Collaborate**
+<h2 style="color:#ffffff; font-weight:500;">
+Contact
+</h2>
 
-<div align="center">
+<div style="margin-top:10px;">
 
 <a href="https://www.linkedin.com/in/abisin-raj/">
-<img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+<img src="https://img.shields.io/badge/LinkedIn-d6bb6a?style=flat&logo=linkedin&logoColor=000000" />
 </a>
 
-<a href="mailto:abisinraj04@gmail.com">
-<img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
+<a href="mailto:abisinraj04@gmail.com" style="margin-left:10px;">
+<img src="https://img.shields.io/badge/Email-d6bb6a?style=flat&logo=gmail&logoColor=000000" />
 </a>
 
-<br />
-<br />
+</div>
 
-<img src="https://komarev.com/ghpvc/?username=abisinraj&label=Profile%20Views&color=0e75b6&style=flat" alt="Profile Views" />
+<div style="margin-top:16px;">
+<img src="https://komarev.com/ghpvc/?username=abisinraj&label=Profile+Views&color=d6bb6a&style=flat" />
+</div>
+
+</div>
 
 </div>
