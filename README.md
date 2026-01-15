@@ -142,71 +142,8 @@ Detection Capabilities
 ">
 
 <h2 style="color:#ffffff; font-weight:500;">
-Technical Implementation Example
-</h2>
 
-```python
-#!/usr/bin/env python3
-"""
-FLOW Core Engine
-Polymorphic Malware Detection using ssdeep fuzzy hashing
-"""
-
-import ssdeep
-import hashlib
-from core.alert_engine import AlertEngine
-
-
-class PolymorphicDetector:
-    def __init__(self, malware_db):
-        self.malware_db = malware_db
-        self.alert = AlertEngine()
-
-    def sha256(self, path):
-        h = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                h.update(chunk)
-        return h.hexdigest()
-
-    def fuzzy_hash(self, path):
-        return ssdeep.hash_from_file(path)
-
-    def detect(self, file_path):
-        file_sha = self.sha256(file_path)
-        file_fuzzy = self.fuzzy_hash(file_path)
-
-        for known_hash, meta in self.malware_db.items():
-            similarity = ssdeep.compare(file_fuzzy, known_hash)
-
-            if similarity > 75:
-                self.alert.send(
-                    title="Polymorphic Malware Detected",
-                    message=(
-                        f"File: {file_path}\n"
-                        f"SHA256: {file_sha}\n"
-                        f"Matched family: {meta.get('family')}\n"
-                        f"Similarity score: {similarity}"
-                    ),
-                    severity=meta.get("severity", "medium")
-                )
-                return {
-                    "file": file_path,
-                    "sha256": file_sha,
-                    "fuzzy": file_fuzzy,
-                    "match_family": meta.get("family"),
-                    "similarity": similarity,
-                    "result": "detected"
-                }
-
-        return {
-            "file": file_path,
-            "sha256": file_sha,
-            "fuzzy": file_fuzzy,
-            "result": "clean"
-        }
-```
-
+        
 </div>
 
 
