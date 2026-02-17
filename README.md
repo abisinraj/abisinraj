@@ -229,8 +229,8 @@ Contact
     text-align:left;
 ">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris-dark.gif?v=2">
-    <img style="width:100%; border-radius:8px;" src="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris.gif?v=2" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris-dark.gif?v=3">
+    <img style="width:100%; border-radius:8px;" src="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris.gif?v=3" />
   </picture>
 </div>
 
