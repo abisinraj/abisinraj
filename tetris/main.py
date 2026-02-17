@@ -36,11 +36,11 @@ def draw_grid(draw, grid, cell_size, colors):
     for week in range(len(grid)):
         for day in range(len(grid[0])):
             color = colors[grid[week][day]]
-            # Upscaled offsets: padding 4px (2 * double)
-            x0, y0 = week * cell_size + 80 + 4, day * cell_size + 40 + 4
-            x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+            # 2px padding for tighter GitHub-like appearance at 40px resolution
+            x0, y0 = week * cell_size + 80 + 2, day * cell_size + 40 + 2
+            x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
             # Block
-            draw.rounded_rectangle([x0, y0, x1, y1], radius=6, fill=color, outline=(255, 255, 255, 20))
+            draw.rounded_rectangle([x0, y0, x1, y1], radius=4, fill=color, outline=(255, 255, 255, 20))
 
 def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_height: int, username: str, year: str, theme_colors: Dict[str, Any], contributions: List[Tuple[Optional[str], int]]):
     # Draw day names (Only show Mon, Wed, Fri)
@@ -155,20 +155,20 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                 draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
                 draw_grid(draw, grid, cell_size, colors)
 
-                # Double offsets: +4px padding
+                # Draw "shattered" fragments
                 x_base = week * cell_size + legend_width
                 y_base = step * cell_size + 40
                 
                 if value == 0:
                     # Draw falling TEXT instead of block
-                    draw.text((x_base + 10, y_base + 10), msg, font=get_font(18), fill=theme_colors['text'])
+                    draw.text((x_base + 6, y_base + 6), msg, font=get_font(18), fill=theme_colors['text'])
                 else:
                     # Draw falling block for active days
-                    x0, y0 = x_base + 4, y_base + 4
-                    x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+                    x0, y0 = x_base + 2, y_base + 2
+                    x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
                     draw.rounded_rectangle(
                         [x0, y0, x1, y1],
-                        radius=6,
+                        radius=4,
                         fill=colors[value],
                         outline=(255, 255, 255, 50)
                     )
@@ -212,12 +212,12 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
             draw_grid(draw, grid, cell_size, colors)
 
-            # Double offsets: +4px padding
-            x0, y0 = week * cell_size + legend_width + 4, day * cell_size + 40 + 4
-            x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+            # 2px padding sync
+            x0, y0 = week * cell_size + legend_width + 2, day * cell_size + 40 + 2
+            x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
             draw.rounded_rectangle(
                 [x0, y0, x1, y1],
-                radius=6,
+                radius=4,
                 fill=colors[value],
                 outline=(255, 255, 255, alpha)
             )
