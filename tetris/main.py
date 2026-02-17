@@ -21,10 +21,10 @@ def draw_grid(draw, grid, cell_size, colors):
     for week in range(len(grid)):
         for day in range(len(grid[0])):
             color = colors[grid[week][day]]
-            x0, y0 = week * cell_size + 40 + 4, day * cell_size + 20 + 4
-            x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8 # Center gap (4px + 12px + 4px = 20px)
+            x0, y0 = week * cell_size + 40 + 2, day * cell_size + 20 + 2
+            x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
             # Block
-            draw.rounded_rectangle([x0, y0, x1, y1], radius=6, fill=color, outline=(255, 255, 255, 20))
+            draw.rounded_rectangle([x0, y0, x1, y1], radius=3, fill=color, outline=(255, 255, 255, 20))
 
 def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_height: int, username: str, year: str, theme_colors: Dict[str, Any], contributions: List[Tuple[Optional[str], int]]):
     # Draw day names (Only show Mon, Wed, Fri)
@@ -118,11 +118,11 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                 draw_grid(draw, grid, cell_size, colors)
 
                 # Draw moving block
-                x0, y0 = week * cell_size + legend_width + 4, step * cell_size + 20 + 4
-                x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+                x0, y0 = week * cell_size + legend_width + 2, step * cell_size + 20 + 2
+                x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
                 draw.rounded_rectangle(
                     [x0, y0, x1, y1],
-                    radius=6,
+                    radius=3,
                     fill=colors[value],
                     outline=(255, 255, 255, 50)
                 )
@@ -138,11 +138,11 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
             draw_grid(draw, grid, cell_size, colors)
 
-            x0, y0 = week * cell_size + legend_width + 4, day * cell_size + 20 + 4
-            x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+            x0, y0 = week * cell_size + legend_width + 2, day * cell_size + 20 + 2
+            x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
             draw.rounded_rectangle(
                 [x0, y0, x1, y1],
-                radius=6,
+                radius=3,
                 fill=colors[value],
                 outline=(255, 255, 255, alpha)
             )
