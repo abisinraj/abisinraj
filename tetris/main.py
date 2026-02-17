@@ -147,6 +147,8 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             frames.append(img)
 
     # Save as animated GIF
+    if len(frames) == 0:
+        raise Exception("No frames generated. Check contribution data.")
     frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=20, loop=0)
 
 if __name__ == "__main__":
@@ -184,6 +186,10 @@ if __name__ == "__main__":
                 rolling_contributions = padding + rolling_contributions
         elif not rolling_contributions:
             raise Exception(f"No contribution data available for user {args.username}")
+
+        # Ensure we always have exactly 371 days to fill the 53-week grid
+        while len(rolling_contributions) < 371:
+            rolling_contributions.append((None, 0))
         
         year_range = f"{current_year - 1} - {current_year}"
         
