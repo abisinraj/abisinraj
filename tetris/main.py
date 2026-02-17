@@ -42,23 +42,7 @@ def draw_legend(draw, cell_size, image_width, image_height, username, year, them
 
     # Removed year text as requested to prevent overlap
 
-    # Add bar below months with "Credits: DEBBAWEB" aligned to the right
-    legend_width = 40
-    bar_height = 20
-    bar_y = image_height - bar_height  # Position at the bottom of the image
-    
-    # Background for credits bar (matches main background)
-    draw.rectangle([legend_width, bar_y, image_width, image_height], fill=theme_colors['background'])
 
-    credits_text = f"@{username} - Credits: DEBBAWEB"
-    font = ImageFont.load_default()  # Load default font
-    bbox = draw.textbbox((0, 0), text=credits_text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-    
-    text_x = image_width - text_width - 5
-    text_y = bar_y + (bar_height - text_height) // 2
-    draw.text((text_x, text_y), credits_text, fill=theme_colors['text'], font=font)  # Draw text with specified font
 
 def create_tetris_gif(username, year, contributions, output_path, theme, year_range):
     width = 53  # 53 weeks
@@ -66,7 +50,7 @@ def create_tetris_gif(username, year, contributions, output_path, theme, year_ra
     cell_size = 20
     legend_width = 40
     image_width = width * cell_size + legend_width
-    image_height = height * cell_size + 40  # Increased to accommodate legend and credits bar
+    image_height = height * cell_size + 20  # Reduced height since credits are removed
 
     # Theme Configuration
     THEMES = {
