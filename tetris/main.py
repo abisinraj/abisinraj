@@ -151,7 +151,17 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
 
         if value == 0:
             # SHATTER MECHANIC: Grey blocks break and show a message
-            messages = ["REST", "IDLE", "RECHARGE", "ZEN", "PAUSE", "OFF"]
+            if date and date < '2025-09-01':
+                messages = [
+                    "KERALA FOUND? HAHA",
+                    "CHRISTOPHER WHO?",
+                    "BEFORE GITHUB DAWN",
+                    "UNDISCOVERED...",
+                    "PRE-COMMIT ERA"
+                ]
+            else:
+                messages = ["REST", "IDLE", "RECHARGE", "ZEN", "PAUSE", "OFF"]
+            
             msg = random.choice(messages)
             msg_font = get_font(24)
             
