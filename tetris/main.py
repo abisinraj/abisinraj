@@ -21,8 +21,6 @@ def draw_grid(draw, grid, cell_size, colors):
             color = colors[grid[week][day]]
             x0, y0 = week * cell_size + 40, day * cell_size + 20
             x1, y1 = x0 + cell_size, y0 + cell_size
-            # Shadow
-            draw.rounded_rectangle([x0 + 3, y0 + 3, x1 + 3, y1 + 3], radius=2, fill=(0, 0, 0, 50))  # Sofeter shadow
             # Block
             draw.rounded_rectangle([x0, y0, x1, y1], radius=2, fill=color, outline=(255, 255, 255, 20))
 
