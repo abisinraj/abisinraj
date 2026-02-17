@@ -3,11 +3,7 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 
-def textsize(text, font):
-    im = Image.new(mode="P", size=(0, 0))
-    draw = ImageDraw.Draw(im)
-    _, _, width, height = draw.textbbox((0, 0), text=text, font=font)
-    return width, height
+
 
 def get_github_contributions(username, year):
     url = f'https://github-contributions-api.jogruber.de/v4/{username}?y={year}'
@@ -58,7 +54,10 @@ def draw_legend(draw, cell_size, image_width, image_height, username, year):
 
     credits_text = f"@{username} - Credits: DEBBAWEB"
     font = ImageFont.load_default()  # Load default font
-    text_width, text_height = textsize(credits_text, font=font)  # Calculate text size
+    bbox = draw.textbbox((0, 0), text=credits_text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    
     text_x = image_width - text_width - 5
     text_y = bar_y + (bar_height - text_height) // 2
     draw.text((text_x, text_y), credits_text, fill=(36, 41, 47), font=font)  # Draw text with specified font
