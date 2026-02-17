@@ -26,9 +26,9 @@ def draw_grid(draw, grid, cell_size, colors):
             x0, y0 = week * cell_size + 40, day * cell_size + 20
             x1, y1 = x0 + cell_size, y0 + cell_size
             # Shadow
-            draw.rectangle([x0 + 3, y0 + 3, x1 + 3, y1 + 3], fill=(0, 0, 0, 100))  # Semi-transparent gray shadow
+            draw.rounded_rectangle([x0 + 3, y0 + 3, x1 + 3, y1 + 3], radius=2, fill=(0, 0, 0, 50))  # Sofeter shadow
             # Block
-            draw.rectangle([x0, y0, x1, y1], fill=color, outline=(255, 255, 255, 20)) # Reduced outline opacity
+            draw.rounded_rectangle([x0, y0, x1, y1], radius=2, fill=color, outline=(255, 255, 255, 20))
 
 def draw_legend(draw, cell_size, image_width, image_height, username, year):
     # Draw day names
