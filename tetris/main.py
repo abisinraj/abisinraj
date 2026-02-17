@@ -55,8 +55,9 @@ def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_he
     # Draw month names dynamically based on data
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     last_month = -1
+    
+    # Ensure the first month is always labeled
     for i, (date_str, count) in enumerate(contributions):
-        # Check every day for month transitions, but only draw label at the start of a week
         if not date_str: continue
         
         dt = datetime.strptime(date_str, '%Y-%m-%d')
@@ -153,11 +154,11 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             # SHATTER MECHANIC: Grey blocks break and show a message
             if date and date < '2025-09-01':
                 messages = [
-                    "KERALA FOUND? HAHA",
-                    "CHRISTOPHER WHO?",
-                    "BEFORE GITHUB DAWN",
-                    "UNDISCOVERED...",
-                    "PRE-COMMIT ERA"
+                    "USER DIDNT DISCOVER GITHUB",
+                    "CHRISTOPHER FOUND KERALA HAHA",
+                    "PRE-GITHUB DISCOVERY",
+                    "SEARCHING FOR GIT...",
+                    "DISCOVERING GITHUB..."
                 ]
             else:
                 messages = ["REST", "IDLE", "RECHARGE", "ZEN", "PAUSE", "OFF"]
