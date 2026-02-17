@@ -61,13 +61,7 @@ Statistics
   </tr>
 </table>
 
-<div style="margin-top:20px; text-align:left;">
-  <img height="155em" src="https://streak-stats.demolab.com/?user=abisinraj&theme=transparent&hide_border=true&ring=d6bb6a&fire=d6bb6a&currStreakLabel=d6bb6a&sideNums=ffffff&sideLabels=aaaaaa" />
-</div>
 
-<div style="margin-top:20px; text-align:left;">
-  <img src="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris.gif" />
-</div>
 
 </div>
 
@@ -115,18 +109,18 @@ The framework provides a structured space for analyzing attacker behavior and im
     text-align:left;
 ">
 
-<h2 style="color:#ffffff; font-weight:500;">
+<!-- <h2 style="color:#ffffff; font-weight:500;">
 Detection Capabilities
-</h2>
+</h2> -->
 
-<div style="margin-top:12px; text-align:left;">
+<!-- <div style="margin-top:12px; text-align:left;">
 
 | Network Detection | Forensic Analysis |
 |------------------|------------------|
 | MITM identification | SHA 256 integrity checks |
 | Tunneling analysis | Fuzzy hashing (ssdeep) |
 | Reverse shell behavior | Signature comparison |
-| Brute force heuristics | File behavior examination |
+| Brute force heuristics | File behavior examination | -->
 
 </div>
 
@@ -217,6 +211,24 @@ Contact
 <img src="https://komarev.com/ghpvc/?username=abisinraj&label=Profile+Views&color=d6bb6a&style=flat" />
 </div>
 
+</div>
+
+</div>
+
+<!-- Tetris GIF - Bottom Location -->
+<div style="
+    max-width:900px;
+    padding:32px;
+    margin-top:32px;
+    margin-bottom:60px;
+    background: rgba(255,255,255,0.05);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    margin:auto;
+    text-align:left;
+">
+  <img style="width:100%; border-radius:8px;" src="https://raw.githubusercontent.com/abisinraj/abisinraj/output-tetris/github-contribution-grid-tetris.gif" />
 </div>
 
 </div>

@@ -19,27 +19,21 @@ jobs:
         with:
           python-version: '3.x'
           
-      - name: Checkout Tetris GIF Maker
-        uses: actions/checkout@v4
-        with:
-          repository: debba/gh-contributions-tetris-gif-maker
-          path: tetris-tool
-          
+
       - name: Install Dependencies
         run: |
-          cd tetris-tool
-          pip install -r requirements.txt
+          pip install -r tetris/requirements.txt
           
       - name: Create dist directory
         run: mkdir dist
 
       - name: Generate GIF
         run: |
-          cd tetris-tool
           ls -la
+          cd tetris
           python main.py --username ${{ github.repository_owner }}
-          ls -la images/
-          mv images/tetris_github.gif ../dist/github-contribution-grid-tetris.gif
+          ls -la
+          mv tetris_github.gif ../dist/github-contribution-grid-tetris.gif
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
