@@ -45,7 +45,7 @@ def draw_legend(draw, cell_size, image_width, image_height, username, year):
         draw.text((x, 5), months[month - 1], fill=(36, 41, 47)) # GitHub Light Text Color
 
     # Draw GitHub username and year in top left
-    text = f"{year}"
+    text = f"{year - 1} - {year}"
     draw.text((5, 5), text, fill=(36, 41, 47)) # GitHub Light Text Color
 
     # Add black bar below months with "Credits: DEBBAWEB" aligned to the right
