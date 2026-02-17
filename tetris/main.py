@@ -130,32 +130,11 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             grid[week][day] = value
             continue
 
-        for step in range(day + 1):
-            if step % 2 == 0:  # Add frames for every second step only
-                img = Image.new('RGB', (image_width, image_height), background_color)
-                draw = ImageDraw.Draw(img)
-                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
-                draw_grid(draw, grid, cell_size, colors)
-
-                # Draw moving block
-                # Double offsets: +4px padding
-                x0, y0 = week * cell_size + legend_width + 4, step * cell_size + 40 + 4
-                x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
-                draw.rounded_rectangle(
-                    [x0, y0, x1, y1],
-                    radius=6,
-                    fill=colors[value],
-                    outline=(255, 255, 255, 50)
-                )
-
-                frames.append(img)
-
         if value == 0:
             # SHATTER MECHANIC: Grey blocks break and show a message
             if date and date < '2025-09-01':
                 messages = [
-                    "USER DIDNT DISCOVER GITHUB",
-                    "CHRISTOPHER FOUND KERALA HAHA",
+                    "USER DIDNT DISCOVER GITHUB YET",
                     "PRE-GITHUB DISCOVERY",
                     "SEARCHING FOR GIT...",
                     "DISCOVERING GITHUB..."
@@ -165,8 +144,39 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
             
             msg = random.choice(messages)
             msg_font = get_font(24)
-            
-            # 4-frame shatter animation
+        else:
+            msg = ""
+            msg_font = None
+
+        for step in range(day + 1):
+            if step % 2 == 0:  # Add frames for every second step only
+                img = Image.new('RGB', (image_width, image_height), background_color)
+                draw = ImageDraw.Draw(img)
+                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
+                draw_grid(draw, grid, cell_size, colors)
+
+                # Double offsets: +4px padding
+                x_base = week * cell_size + legend_width
+                y_base = step * cell_size + 40
+                
+                if value == 0:
+                    # Draw falling TEXT instead of block
+                    draw.text((x_base + 10, y_base + 10), msg, font=get_font(18), fill=theme_colors['text'])
+                else:
+                    # Draw falling block for active days
+                    x0, y0 = x_base + 4, y_base + 4
+                    x1, y1 = x0 + cell_size - 8, y0 + cell_size - 8
+                    draw.rounded_rectangle(
+                        [x0, y0, x1, y1],
+                        radius=6,
+                        fill=colors[value],
+                        outline=(255, 255, 255, 50)
+                    )
+
+                frames.append(img)
+
+        if value == 0:
+            # 4-frame shatter animation for words
             for frame_idx in range(4):
                 img = Image.new('RGB', (image_width, image_height), background_color)
                 draw = ImageDraw.Draw(img)
@@ -253,24 +263,34 @@ if __name__ == "__main__":
         if len(rolling_contributions) < 371:
             rolling_contributions = all_contributions[-371:]
 
-        # Shift to align with Sunday
+        # Get the latest possible date provided by the API
+        if rolling_contributions and rolling_contributions[-1][0]:
+            last_date = datetime.strptime(rolling_contributions[-1][0], '%Y-%m-%d')
+            # Pad at the END to reach the end of the current week (Saturday)
+            # Python weekday: Mon=0, ..., Sat=5, Sun=6. Saturday is target.
+            # If Mon (0), we need 5 days (Sat-Mon). If Sat (5), we need 0. If Sun (6), we need 6.
+            days_to_saturday = (5 - last_date.weekday()) % 7
+            if days_to_saturday > 0:
+                end_padding: List[Tuple[Optional[str], int]] = [(None, 0)] * days_to_saturday
+                rolling_contributions = rolling_contributions + end_padding
+
+        # Shift to align with Sunday at the START
         if rolling_contributions and rolling_contributions[0][0]:
             first_date = datetime.strptime(rolling_contributions[0][0], '%Y-%m-%d')
-            # Python weekday: Mon=0, ..., Sun=6. GitHub start: Sun=0.
-            # Convert Mon=0->1, ..., Sun=6->0
             shift = (first_date.weekday() + 1) % 7
             if shift > 0:
-                padding: List[Tuple[Optional[str], int]] = [(None, 0)] * shift
-                rolling_contributions = padding + rolling_contributions
+                start_padding: List[Tuple[Optional[str], int]] = [(None, 0)] * shift
+                rolling_contributions = start_padding + rolling_contributions
         elif not rolling_contributions:
             raise Exception(f"No contribution data available for user {args.username}")
 
-        # Ensure we always have exactly 371 days to fill the 53-week grid
-        if len(rolling_contributions) > 371:
-            rolling_contributions = rolling_contributions[:371]
-        else:
-            while len(rolling_contributions) < 371:
-                rolling_contributions.append((None, 0))
+        # Now take the LAST 371 days (53 weeks) from this padded list
+        # This ensures we have today (and its week) at the very end.
+        rolling_contributions = rolling_contributions[-371:]
+        
+        # Guard: if it's still shorter than 371, pad the start (shouldn't happen with API data)
+        while len(rolling_contributions) < 371:
+            rolling_contributions = [(None, 0)] + rolling_contributions
         
         year_range = f"{current_year - 1} - {current_year}"
         
