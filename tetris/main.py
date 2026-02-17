@@ -165,23 +165,25 @@ if __name__ == "__main__":
         contributions_prev: List[Tuple[str, int]] = get_github_contributions(args.username, current_year - 1)
         
         # Combine and sort by date just in case
-        all_contributions: List[Tuple[str, int]] = sorted(contributions_current + contributions_prev, key=lambda x: x[0])
+        all_contributions: List[Tuple[Optional[str], int]] = sorted(contributions_current + contributions_prev, key=lambda x: x[0] if x[0] else "")
         
-        # Keep only the last 371 days (53 weeks * 7 days)
-        # This gives us the rolling year window
-        rolling_contributions: List[Tuple[str, int]] = all_contributions[-371:]
-        
+        if len(all_contributions) == 0:
+            raise Exception(f"No contributions found for user {args.username}")
+
+        # Take up to 371 days (may be less for new accounts)
+        rolling_contributions: List[Tuple[Optional[str], int]] = all_contributions[-371:] if len(all_contributions) >= 371 else all_contributions
+
         # Shift to align with Sunday
-        # Python weekday: Mon=0, ..., Sat=5, Sun=6
-        # GitHub/Grid: Sun=0, Mon=1, ..., Sat=6
-        if rolling_contributions:
+        if rolling_contributions and rolling_contributions[0][0]:
             first_date = datetime.strptime(rolling_contributions[0][0], '%Y-%m-%d')
             # How many days from Sunday is the first date?
             # If Sun (6), shift is 0. If Mon (0), shift is 1.
             shift = (first_date.weekday() + 1) % 7
             if shift > 0:
-                padding: List[Tuple[str, int]] = [(None, 0)] * shift
+                padding: List[Tuple[Optional[str], int]] = [(None, 0)] * shift
                 rolling_contributions = padding + rolling_contributions
+        elif not rolling_contributions:
+            raise Exception(f"No contribution data available for user {args.username}")
         
         year_range = f"{current_year - 1} - {current_year}"
         
