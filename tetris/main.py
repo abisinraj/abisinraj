@@ -2,7 +2,7 @@ import argparse
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
-from typing import List, Tuple, Dict, TypedDict
+from typing import List, Tuple, Dict, TypedDict, Optional, Any
 
 
 
@@ -25,7 +25,7 @@ def draw_grid(draw, grid, cell_size, colors):
             # Block
             draw.rounded_rectangle([x0, y0, x1, y1], radius=6, fill=color, outline=(255, 255, 255, 20))
 
-def draw_legend(draw, cell_size, image_width, image_height, username, year, theme_colors):
+def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_height: int, username: str, year: str, theme_colors: Dict[str, Any], contributions: List[Tuple[Optional[str], int]]):
     # Draw day names (Only show Mon, Wed, Fri)
     days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     for i, day in enumerate(days):
@@ -33,18 +33,24 @@ def draw_legend(draw, cell_size, image_width, image_height, username, year, them
             y = i * cell_size + 20
             draw.text((5, y), day, fill=theme_colors['text'])
 
-    # Draw month names
+    # Draw month names dynamically based on data
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    month_positions = {1: 0, 2: 4, 3: 8, 4: 12, 5: 16, 6: 20, 7: 24, 8: 28, 9: 32, 10: 36, 11: 40, 12: 44}
-    for month, week in month_positions.items():
-        x = week * cell_size + 40
-        draw.text((x, 5), months[month - 1], fill=theme_colors['text'])
+    last_month = -1
+    for i, (date_str, count) in enumerate(contributions):
+        if not date_str or i % 7 != 0: continue
+        
+        dt = datetime.strptime(date_str, '%Y-%m-%d')
+        if dt.month != last_month:
+            week = i // 7
+            x = week * cell_size + 40
+            draw.text((x, 5), months[dt.month - 1], fill=theme_colors['text'])
+            last_month = dt.month
 
     # Removed year text as requested to prevent overlap
 
 
 
-def create_tetris_gif(username: str, year: int, contributions: List[Tuple[str, int]], output_path: str, theme: str, year_range: str):
+def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Optional[str], int]], output_path: str, theme: str, year_range: str):
     width = 53  # 53 weeks
     height = 7  # 7 days per week
     cell_size = 20
@@ -95,11 +101,16 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[str, i
         else:
             value = 4
 
+        # If it's a padding element (no date), just skip animation and fill grid
+        if not date:
+            grid[week][day] = value
+            continue
+
         for step in range(day + 1):
             if step % 2 == 0:  # Add frames for every second step only
                 img = Image.new('RGB', (image_width, image_height), background_color)
                 draw = ImageDraw.Draw(img)
-                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors)
+                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
                 draw_grid(draw, grid, cell_size, colors)
 
                 # Draw moving block
@@ -120,7 +131,7 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[str, i
         for alpha in range(0, 256, 50):  # Larger steps to make the fade faster
             img = Image.new('RGB', (image_width, image_height), background_color)
             draw = ImageDraw.Draw(img)
-            draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors)
+            draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, contributions)
             draw_grid(draw, grid, cell_size, colors)
 
             x0, y0 = week * cell_size + legend_width + 4, day * cell_size + 20 + 4
