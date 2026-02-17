@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, TypedDict
 
 
 
-def get_github_contributions(username, year):
+def get_github_contributions(username: str, year: int) -> List[Tuple[str, int]]:
     url = f'https://github-contributions-api.jogruber.de/v4/{username}?y={year}'
     response = requests.get(url)
     if response.status_code != 200:
@@ -43,7 +43,7 @@ def draw_legend(draw, cell_size, image_width, image_height, username, year, them
 
 
 
-def create_tetris_gif(username, year, contributions, output_path, theme, year_range):
+def create_tetris_gif(username: str, year: int, contributions: List[Tuple[str, int]], output_path: str, theme: str, year_range: str):
     width = 53  # 53 weeks
     height = 7  # 7 days per week
     cell_size = 20
@@ -74,8 +74,7 @@ def create_tetris_gif(username, year, contributions, output_path, theme, year_ra
     colors = theme_colors['colors']
     background_color = theme_colors['background']
 
-    frames = []
-    # Initialize grid with background color index (0)
+    frames: List[Image.Image] = []
     # Initialize grid with background color index (0)
     grid: List[List[int]] = [[0] * height for _ in range(width)]
 
@@ -149,15 +148,15 @@ if __name__ == "__main__":
     try:
         current_year = datetime.now().year
         # Fetch current and previous year to get a full rolling window
-        contributions_current = get_github_contributions(args.username, current_year)
-        contributions_prev = get_github_contributions(args.username, current_year - 1)
+        contributions_current: List[Tuple[str, int]] = get_github_contributions(args.username, current_year)
+        contributions_prev: List[Tuple[str, int]] = get_github_contributions(args.username, current_year - 1)
         
         # Combine and sort by date just in case
-        all_contributions = sorted(contributions_current + contributions_prev, key=lambda x: x[0])
+        all_contributions: List[Tuple[str, int]] = sorted(contributions_current + contributions_prev, key=lambda x: x[0])
         
         # Keep only the last 371 days (53 weeks * 7 days)
         # This gives us the rolling year window
-        rolling_contributions = all_contributions[-371:]
+        rolling_contributions: List[Tuple[str, int]] = all_contributions[-371:]
         
         year_range = f"{current_year - 1} - {current_year}"
         
