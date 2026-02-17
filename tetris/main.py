@@ -90,6 +90,9 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
         week = i // 7
         day = i % 7
         
+        if week >= width:
+            break  # Skip extra weeks if any
+        
         # Map count to color index (0-4)
         if count == 0:
             value = 0
@@ -188,8 +191,11 @@ if __name__ == "__main__":
             raise Exception(f"No contribution data available for user {args.username}")
 
         # Ensure we always have exactly 371 days to fill the 53-week grid
-        while len(rolling_contributions) < 371:
-            rolling_contributions.append((None, 0))
+        if len(rolling_contributions) > 371:
+            rolling_contributions = rolling_contributions[:371]
+        else:
+            while len(rolling_contributions) < 371:
+                rolling_contributions.append((None, 0))
         
         year_range = f"{current_year - 1} - {current_year}"
         
