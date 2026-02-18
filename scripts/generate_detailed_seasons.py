@@ -10,7 +10,8 @@ def hex_to_rgb(hex_color):
     except ValueError:
         return (0, 0, 0) # Fallback
 
-def draw_stardew_scene(season, frame_index, width=256, height=128):
+# BANNER WIDTH: 700px
+def draw_stardew_scene(season, frame_index, width=700, height=128):
     img = Image.new("RGBA", (width, height), (255, 255, 255, 255))
     draw = ImageDraw.Draw(img)
 
@@ -55,9 +56,10 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
     sun_col = (255, 255, 200, 200) if season != "autumn" else (255, 140, 0, 200)
     draw.ellipse([width - 50, 5, width - 10, 45], fill=sun_col)
     
-    # Mountains (Fixed)
-    mx_start = 0
-    for i in range(5):
+    # Mountains (Fixed) - Fill scale
+    mx_start = -50
+    # ensure we cover width
+    while mx_start < width + 50:
         peak_h = 30 + random.randint(-5, 5)
         base_w = 60 + random.randint(0, 20)
         draw.polygon([
@@ -70,7 +72,10 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
     # 2. TREES & WIND (Sakura - Parallax Scroll)
     tree_scroll = int(frame_index * 4) 
     random.seed(99) 
-    for i in range(20): 
+    # Scale tree count with width
+    num_trees = int(width / 12) # Approx one tree every 12px avg
+    
+    for i in range(num_trees): 
         orig_x = random.randint(-50, width + 300) 
         tx = (orig_x - tree_scroll) 
         
@@ -90,8 +95,8 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
             # Add LOTS of petals
             if season == "spring":
                  random.seed(tx * 10) # Consistent per tree but random
-                 for _ in range(5): # 5 petals per tree area
-                     px = tx + random.randint(-30, 50) - (frame_index * 5) % 100 # Falling diagonally
+                 for _ in range(5): 
+                     px = tx + random.randint(-30, 50) - (frame_index * 5) % 100 
                      py = ty - random.randint(-20, 40) + (frame_index * 2) % 40
                      draw.point((px, py), fill="#FF69B4") # Hot Pink
 
@@ -100,7 +105,7 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
         # Wind Lines "Whooshing"
         wind_shift = int(frame_index * 15)
         random.seed(777)
-        for i in range(10):
+        for i in range(int(width / 25)): # Scale wind lines
             wx_start = random.randint(-100, width)
             wy = random.randint(10, slope_bottom)
             
@@ -110,7 +115,7 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
     # Particles (Dust/Pollen)
     if season in ["spring", "summer"]:
         random.seed(frame_index + 100)
-        for _ in range(30):
+        for _ in range(int(width / 8)): # Scale particles
             dx = random.randint(0, width)
             dy = random.randint(0, height)
             d_col = (255, 255, 200, 150) if season=="summer" else (255, 192, 203, 150)
@@ -120,7 +125,7 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
     draw.rectangle([0, road_top, width, road_bottom], fill=cols["road"] + (255,))
     
     random.seed(123) 
-    for _ in range(400):
+    for _ in range(int(width * 2)): # Scale road texture
         orig_rx = random.randint(-width, width * 2)
         ry = random.randint(road_top, road_bottom)
         rx_wrapped = (orig_rx - world_shift) % width
@@ -145,7 +150,7 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
 
     if season != "winter":
         random.seed(42) 
-        for _ in range(60):
+        for _ in range(int(width / 4)): # Scale flowers
             orig_fx = random.randint(0, width)
             fy = random.randint(road_bottom + 2, slope_bottom - 2)
             fx = (orig_fx - world_shift) % width
@@ -157,7 +162,7 @@ def draw_stardew_scene(season, frame_index, width=256, height=128):
     river_flow = frame_index * 10
     if season == "winter": river_flow = 0
     random.seed(55)
-    for i in range(50):
+    for i in range(int(width / 5)): # Scale river lines
         orig_lx = random.randint(0, width)
         y = random.randint(slope_bottom + 2, height - 2)
         lw = random.randint(10, 30)
@@ -270,4 +275,4 @@ if __name__ == "__main__":
         duration=120, 
         loop=0
     )
-    print(f"Generated Final Spring/Legs GIF at {output_path}")
+    print(f"Generated Final Banner GIF at {output_path}")
