@@ -146,7 +146,12 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     
     # Animate each level batch
     print(f"Generating GIF for {username} - Theme: {theme}")
-    for level in range(5):
+
+    # Place level-0 (empty/grey) cells directly — no falling animation
+    for week, day, val in batches[0]:
+        grid[week][day] = val
+
+    for level in range(1, 5):
         batch = batches[level]
         if not batch: continue
         print(f"  Animating Level {level} batch ({len(batch)} blocks)...")
@@ -168,48 +173,28 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                 x_base = week * cell_size + legend_width
                 y_base = current_step * cell_size + 40
                 
-                # All blocks in the batch fall together
                 x0, y0 = x_base + 2, y_base + 2
                 x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-                draw.rounded_rectangle([x0, y0, x1, y1], radius=4, fill=colors[val], outline=(255, 255, 255, 50))
+                draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[val], outline=(255, 255, 255, 50))
             
             frames.append(img)
 
-        # Post-falling logic for the batch
-        if level == 0:
-            # Simultaneous shatter for ALL grey blocks in this batch
-            for frame_idx in range(4):
-                img = Image.new('RGB', (image_width, image_height), background_color)
-                draw = ImageDraw.Draw(img)
-                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
-                draw_grid(draw, grid, cell_size, colors, theme_colors)
-                
-                alpha = 255 - (frame_idx * 60)
-                for week, day, val in batch:
-                    x_base = week * cell_size + legend_width
-                    y_base = day * cell_size + 40
-                    for _ in range(5):
-                        frag_x = x_base + random.randint(0, cell_size - 10)
-                        frag_y = y_base + random.randint(0, cell_size - 10)
-                        size = random.randint(4, 8)
-                        draw.rounded_rectangle([frag_x, frag_y, frag_x + size, frag_y + size], radius=2, fill=colors[0], outline=(255, 255, 255, alpha))
-                frames.append(img)
-        else:
+        # Place blocks into grid then do a brief fade-in
+        for week, day, val in batch:
+            grid[week][day] = val
+            
+        for alpha in range(0, 256, 128):
+            img = Image.new('RGB', (image_width, image_height), background_color)
+            draw = ImageDraw.Draw(img)
+            draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
+            draw_grid(draw, grid, cell_size, colors, theme_colors)
+            
             for week, day, val in batch:
-                grid[week][day] = val
-                
-            # Batch fade animation
-            for alpha in range(0, 256, 128):
-                img = Image.new('RGB', (image_width, image_height), background_color)
-                draw = ImageDraw.Draw(img)
-                draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
-                draw_grid(draw, grid, cell_size, colors, theme_colors)
-                
-                for week, day, val in batch:
-                    x0, y0 = week * cell_size + legend_width + 2, day * cell_size + 40 + 2
-                    x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-                    draw.rounded_rectangle([x0, y0, x1, y1], radius=4, fill=colors[val], outline=(255, 255, 255, alpha))
-                frames.append(img)
+                x0, y0 = week * cell_size + legend_width + 2, day * cell_size + 40 + 2
+                x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
+                draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[val], outline=(255, 255, 255, alpha))
+            frames.append(img)
+
 
     # Save as animated GIF
     if len(frames) == 0:
