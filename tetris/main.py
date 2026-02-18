@@ -40,18 +40,16 @@ def get_font(size):
     return _FONT_CACHE[size]
 
 def draw_grid(draw, grid, cell_size, colors, theme_colors):
-    # GitHub-style cell border: visible but subtle, theme-aware
-    # Light theme: dark semi-transparent border; Dark theme: lighter border
-    is_dark = theme_colors['background'] == '#0d1117'
-    border_color = (27, 31, 35, 80) if not is_dark else (240, 246, 252, 40)
+    # Neutral grey border — subtle on both light and dark themes
+    border_color = (150, 150, 150, 60)
     for week in range(len(grid)):
         for day in range(len(grid[0])):
             color = colors[grid[week][day]]
             # 2px padding for tighter GitHub-like appearance at 40px resolution
             x0, y0 = week * cell_size + 80 + 2, day * cell_size + 40 + 2
             x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-            # Block with visible border
-            draw.rounded_rectangle([x0, y0, x1, y1], radius=4, fill=color, outline=border_color, width=1)
+            # Rounder corners (radius=8) with grey border
+            draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=color, outline=border_color, width=1)
 
 def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_height: int, username: str, year: str, theme_colors: Dict[str, Any], month_labels: List[Tuple[int, str]]):
     # Draw day names (Only show Mon, Wed, Fri)
