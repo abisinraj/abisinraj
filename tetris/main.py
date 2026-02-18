@@ -216,57 +216,43 @@ if __name__ == "__main__":
         contributions_current: List[Tuple[str, int]] = get_github_contributions(args.username, current_year)
         contributions_prev: List[Tuple[str, int]] = get_github_contributions(args.username, current_year - 1)
         
-        # Combine and sort by date
-        all_contributions: List[Tuple[Optional[str], int]] = sorted(contributions_current + contributions_prev, key=lambda x: x[0] if x[0] else "")
+        # Combine, deduplicate by date, and sort
+        all_map: Dict[str, int] = {}
+        for d, c in contributions_prev + contributions_current:
+            if d:
+                all_map[d] = c  # later entries (current year) overwrite dupes
         
-        if len(all_contributions) == 0:
-            raise Exception(f"No contributions found for user {args.username}")
-
-        # Get today's date and find exactly 52 weeks ago
-        # GitHubcontribution data is usually up to yesterday/today.
-        # We want a 53-week window (52 weeks + current partial week)
+        # Build a day-by-day list from exactly 1 year ago to today
         today = datetime.now()
-        start_date_limit = (today - timedelta(days=370)).strftime('%Y-%m-%d')
+        # GitHub graph ends on the current Saturday (or today if Saturday)
+        # and starts 52 weeks before the prior Sunday
+        # Find the Saturday >= today
+        days_to_sat = (5 - today.weekday()) % 7
+        end_date = today + timedelta(days=days_to_sat)
+        # Start from 52 weeks before the Sunday before end_date
+        start_date = end_date - timedelta(days=52 * 7 + 6)  # 53 weeks = 371 days
         
-        # Filter for data from roughly one year ago
-        rolling_contributions = [c for c in all_contributions if c[0] and c[0] >= start_date_limit]
+        print(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
         
-        # If we have less than 371 days after filtering, just take the last 371
-        if len(rolling_contributions) < 371:
-            rolling_contributions = all_contributions[-371:]
-
-        # Get the latest possible date provided by the API
-        if rolling_contributions and rolling_contributions[-1][0]:
-            last_date = datetime.strptime(rolling_contributions[-1][0], '%Y-%m-%d')
-            # Pad at the END to reach the end of the current week (Saturday)
-            # Python weekday: Mon=0, ..., Sat=5, Sun=6. Saturday is target.
-            # If Mon (0), we need 5 days (Sat-Mon). If Sat (5), we need 0. If Sun (6), we need 6.
-            days_to_saturday = (5 - last_date.weekday()) % 7
-            if days_to_saturday > 0:
-                end_padding: List[Tuple[Optional[str], int]] = [(None, 0)] * days_to_saturday
-                rolling_contributions = rolling_contributions + end_padding
-
-        # Shift to align with Sunday at the START
+        rolling_contributions: List[Tuple[Optional[str], int]] = []
+        d = start_date
+        while d <= end_date:
+            ds = d.strftime('%Y-%m-%d')
+            count = all_map.get(ds, 0)
+            if d <= today:
+                rolling_contributions.append((ds, count))
+            else:
+                rolling_contributions.append((None, 0))  # future padding
+            d += timedelta(days=1)
+        
+        print(f"Total days in window: {len(rolling_contributions)}")
         if rolling_contributions and rolling_contributions[0][0]:
-            first_date = datetime.strptime(rolling_contributions[0][0], '%Y-%m-%d')
-            shift = (first_date.weekday() + 1) % 7
-            if shift > 0:
-                start_padding: List[Tuple[Optional[str], int]] = [(None, 0)] * shift
-                rolling_contributions = start_padding + rolling_contributions
-        elif not rolling_contributions:
-            raise Exception(f"No contribution data available for user {args.username}")
-
-        # Now take the LAST 371 days (53 weeks) from this padded list
-        # This ensures we have today (and its week) at the very end.
-        rolling_contributions = rolling_contributions[-371:]
-        
-        # Guard: if it's still shorter than 371, pad the start (shouldn't happen with API data)
-        while len(rolling_contributions) < 371:
-            rolling_contributions = [(None, 0)] + rolling_contributions
+            print(f"First date: {rolling_contributions[0][0]}")
+        if rolling_contributions and rolling_contributions[-1][0]:
+            print(f"Last date: {rolling_contributions[-1][0]}")
         
         year_range = f"{current_year - 1} - {current_year}"
         
-        # Ensure output directory matches where we run it from or absolute path
         create_tetris_gif(args.username, current_year, rolling_contributions, args.output, args.theme, year_range)
         print("GIF created successfully!")
     except Exception as e:
