@@ -40,8 +40,8 @@ def get_font(size):
     return _FONT_CACHE[size]
 
 def draw_grid(draw, grid, cell_size, colors, theme_colors):
-    # Neutral grey border — subtle on both light and dark themes
-    border_color = (150, 150, 150, 60)
+    # Neutral grey border — very subtle on both light and dark themes
+    border_color = (150, 150, 150, 25)
     for week in range(len(grid)):
         for day in range(len(grid[0])):
             color = colors[grid[week][day]]
