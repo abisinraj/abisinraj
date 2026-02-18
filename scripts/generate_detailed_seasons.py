@@ -64,6 +64,8 @@ def draw_scene(season, frame, W=1200, H=128):
     t_scroll = frame * (spd // 2 if season == "spring" else 4)
     random.seed(99)
     n_trees = W // 10
+    if season == "spring":
+        n_trees = W // 25  # Fewer trees for a more open, serene sakura park feel
     for _ in range(n_trees):
         ox = random.randint(-60, W + 350)
         tx = ox - t_scroll
@@ -78,13 +80,15 @@ def draw_scene(season, frame, W=1200, H=128):
         d.ellipse([tx+tw//2-6, ty-th-16, tx+tw+9, ty-th+1], fill=lc)
         d.ellipse([tx-3, ty-th-27, tx+tw+3, ty-th-4], fill=lc)
 
-        # Spring: falling petals
+        # Spring: falling petals (local to tree)
         if season == "spring":
-            random.seed(abs(int(tx)) * 7 + frame)
-            for _ in range(6):
-                px = tx + random.randint(-35, 55) - (frame * 5) % 110
-                py = ty - random.randint(-15, 45) + (frame * 2) % 45
-                d.point((int(px), int(py)), fill=(255, 105, 180, 220))
+            # Use a stable seed for positions but add a slow falling offset
+            random.seed(abs(int(ox)) * 7) # Fixed seed based on tree's original position
+            for _ in range(4):
+                # Petals fall slowly: (frame * 2) pixels down
+                px = tx + random.randint(-40, 60) - (frame * 0.5)
+                py = ty - random.randint(-10, 40) + (frame * 1.5)
+                d.point((int(px), int(py)), fill=(255, 105, 180, 200))
 
     # ── 4. Season-specific atmosphere ─────────────────────────────────────────
 
@@ -99,17 +103,17 @@ def draw_scene(season, frame, W=1200, H=128):
             wx  = (ox0 + p_shift * 1.5) % (W + 120) - 60
             d.line([wx, oy, wx + 40, oy], fill=(255, 255, 255, 70), width=1)
         
-        # Consistent drifting petals across the whole screen
+        # Drift even more slowly: 1 pixel per frame
         random.seed(9999)
-        for _ in range(W // 6):
+        for _ in range(W // 8):
             ox0 = random.randint(-200, W + 200)
             oy0 = random.randint(-50, H + 50)
-            # Drift very slowly: 2 pixels per frame
-            px = (ox0 - frame * 2) % W
-            py = (oy0 + frame * 1 + math.sin(frame * 0.4 + ox0) * 5) % H
+            # Drift very slowly: 1 pixel per frame left, 0.5 pixels down
+            px = (ox0 - frame * 1) % W
+            py = (oy0 + frame * 0.5 + math.sin(frame * 0.3 + ox0) * 4) % H
             # Varied pink shades
-            p_col = random.choice([(255, 182, 193, 180), (255, 105, 180, 160), (255, 192, 203, 140)])
-            d.rectangle([px, py, px+2, py+2], fill=p_col)
+            p_col = random.choice([(255, 182, 193, 160), (255, 105, 180, 140), (255, 192, 203, 120)])
+            d.rectangle([px, py, px+1, py+1], fill=p_col)
 
     # SUMMER – heat shimmer dots + golden pollen
     elif season == "summer":
