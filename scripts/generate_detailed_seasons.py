@@ -1,278 +1,322 @@
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
-import os
+from PIL import Image, ImageDraw
 import random
 import math
 
-def hex_to_rgb(hex_color):
-    try:
-        hex_color = hex_color.lstrip('#')
-        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-    except ValueError:
-        return (0, 0, 0) # Fallback
+def hex_to_rgb(h):
+    h = h.lstrip('#')
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
-# BANNER WIDTH: 700px
-def draw_stardew_scene(season, frame_index, width=700, height=128):
-    img = Image.new("RGBA", (width, height), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img)
+# ─── BANNER: 900 × 128 ────────────────────────────────────────────────────────
+def draw_scene(season, frame, W=900, H=128):
+    img = Image.new("RGBA", (W, H))
+    d = ImageDraw.Draw(img)
 
-    # --- PALETTES (Stardew-inspired) ---
-    palettes = {
-        "spring": {
-            "sky": "#87CEFA", "mountain": "#7B68EE", "road": "#8B4513", 
-            "grass_base": "#66CD00", "grass_shade": "#458B00", "tree_trunk": "#8B4513", "tree_leaf": "#FFB7C5", # Sakura Pink
-            "river": "#1E90FF", "flower": "#FF69B4"
-        },
-        "summer": {
-            "sky": "#00BFFF", "mountain": "#483D8B", "road": "#A0522D", 
-            "grass_base": "#32CD32", "grass_shade": "#006400", "tree_trunk": "#8B4513", "tree_leaf": "#008000",
-            "river": "#0000CD", "flower": "#FFD700"
-        },
-        "autumn": {
-            "sky": "#FF7F50", "mountain": "#8B4513", "road": "#696969", 
-            "grass_base": "#DAA520", "grass_shade": "#8B4513", "tree_trunk": "#654321", "tree_leaf": "#FF4500",
-            "river": "#4682B4", "flower": "#800000"
-        },
-        "winter": {
-            "sky": "#B0C4DE", "mountain": "#708090", "road": "#A9A9A9", 
-            "grass_base": "#F0FFFF", "grass_shade": "#AFEEEE", "tree_trunk": "#2F4F4F", "tree_leaf": "#F0F8FF",
-            "river": "#B0E0E6", "flower": "#FFFFFF"
-        }
+    # ── Palettes ──────────────────────────────────────────────────────────────
+    P = {
+        "spring":  dict(sky="#87CEFA", mtn="#7B68EE", road="#8B4513",
+                        grass="#66CD00", shade="#458B00", trunk="#8B4513",
+                        leaf="#FFB7C5", river="#1E90FF", flower="#FF69B4"),
+        "summer":  dict(sky="#00BFFF", mtn="#483D8B", road="#A0522D",
+                        grass="#32CD32", shade="#006400", trunk="#8B4513",
+                        leaf="#228B22", river="#0000CD", flower="#FFD700"),
+        "autumn":  dict(sky="#FF7F50", mtn="#8B4513", road="#696969",
+                        grass="#DAA520", shade="#8B4513", trunk="#654321",
+                        leaf="#FF4500", river="#4682B4", flower="#800000"),
+        "winter":  dict(sky="#B0C4DE", mtn="#708090", road="#A9A9A9",
+                        grass="#E8F4F8", shade="#AFEEEE", trunk="#2F4F4F",
+                        leaf="#D0E8F0", river="#B0E0E6", flower="#FFFFFF"),
     }
-    cols = {k: hex_to_rgb(v) for k, v in palettes[season].items()}
+    c = {k: hex_to_rgb(v) for k, v in P[season].items()}
 
-    # --- SCROLL SPEEDS (Parallax) ---
-    base_speed = 8 
-    world_shift = frame_index * base_speed
-    
-    sky_h = int(height * 0.3)
-    road_top = sky_h
-    road_bottom = int(height * 0.5) 
-    slope_bottom = int(height * 0.75)
-    
-    # 1. SKY & HORIZON
-    draw.rectangle([0, 0, width, sky_h], fill=cols["sky"] + (255,))
-    
-    # Sun/Moon
-    sun_col = (255, 255, 200, 200) if season != "autumn" else (255, 140, 0, 200)
-    draw.ellipse([width - 50, 5, width - 10, 45], fill=sun_col)
-    
-    # Mountains (Fixed) - Fill scale
-    mx_start = -50
-    # ensure we cover width
-    while mx_start < width + 50:
-        peak_h = 30 + random.randint(-5, 5)
-        base_w = 60 + random.randint(0, 20)
-        draw.polygon([
-            (mx_start, sky_h), 
-            (mx_start + base_w//2, sky_h - peak_h), 
-            (mx_start + base_w, sky_h)
-        ], fill=cols["mountain"] + (255,))
-        mx_start += base_w // 1.5
+    # ── Layout ────────────────────────────────────────────────────────────────
+    SKY_H   = int(H * 0.30)   # 0–38
+    ROAD_T  = SKY_H            # 38
+    ROAD_B  = int(H * 0.50)   # 64
+    SLOPE_B = int(H * 0.75)   # 96
 
-    # 2. TREES & WIND (Sakura - Parallax Scroll)
-    tree_scroll = int(frame_index * 4) 
-    random.seed(99) 
-    # Scale tree count with width
-    num_trees = int(width / 12) # Approx one tree every 12px avg
-    
-    for i in range(num_trees): 
-        orig_x = random.randint(-50, width + 300) 
-        tx = (orig_x - tree_scroll) 
-        
-        if -20 < tx < width + 20:
-            ty = road_top + random.randint(-5, 10) 
-            tw, th = 12, 35
-            
-            # Trunk
-            draw.rectangle([tx, ty-th, tx+tw, ty], fill=cols["tree_trunk"] + (255,))
-            # Foliage
-            leaf_c = cols["tree_leaf"] + (255,)
-            draw.ellipse([tx-8, ty-th-15, tx+tw//2, ty-th], fill=leaf_c)
-            draw.ellipse([tx+tw//2-5, ty-th-15, tx+tw+8, ty-th], fill=leaf_c)
-            draw.ellipse([tx-2, ty-th-25, tx+tw+2, ty-th-5], fill=leaf_c)        
-            
-            # Falling petals (Sakura/Spring)
-            # Add LOTS of petals
-            if season == "spring":
-                 random.seed(tx * 10) # Consistent per tree but random
-                 for _ in range(5): 
-                     px = tx + random.randint(-30, 50) - (frame_index * 5) % 100 
-                     py = ty - random.randint(-20, 40) + (frame_index * 2) % 40
-                     draw.point((px, py), fill="#FF69B4") # Hot Pink
+    spd = 8
+    shift = frame * spd
 
-    # WIND & PARTICLES (Global)
+    # ── 1. Sky ────────────────────────────────────────────────────────────────
+    d.rectangle([0, 0, W, SKY_H], fill=c["sky"] + (255,))
+
+    # Sun / Moon
+    if season == "winter":
+        d.ellipse([W-55, 4, W-15, 44], fill=(220, 230, 255, 200))  # pale moon
+    elif season == "autumn":
+        d.ellipse([W-55, 4, W-15, 44], fill=(255, 140, 0, 200))
+    else:
+        d.ellipse([W-55, 4, W-15, 44], fill=(255, 255, 200, 200))
+
+    # ── 2. Mountains ──────────────────────────────────────────────────────────
+    random.seed(11)
+    mx = -60
+    while mx < W + 60:
+        ph = 28 + random.randint(-6, 6)
+        bw = 65 + random.randint(0, 25)
+        d.polygon([(mx, SKY_H), (mx + bw//2, SKY_H - ph), (mx + bw, SKY_H)],
+                  fill=c["mtn"] + (255,))
+        mx += int(bw * 0.65)
+
+    # ── 3. Trees (parallax ×0.5) ──────────────────────────────────────────────
+    t_scroll = frame * 4
+    random.seed(99)
+    n_trees = W // 10
+    for _ in range(n_trees):
+        ox = random.randint(-60, W + 350)
+        tx = ox - t_scroll
+        if not (-25 < tx < W + 25):
+            continue
+        ty = ROAD_T + random.randint(-6, 8)
+        tw, th = 13, 36
+
+        d.rectangle([tx, ty - th, tx + tw, ty], fill=c["trunk"] + (255,))
+        lc = c["leaf"] + (255,)
+        d.ellipse([tx-9, ty-th-16, tx+tw//2+1, ty-th+1], fill=lc)
+        d.ellipse([tx+tw//2-6, ty-th-16, tx+tw+9, ty-th+1], fill=lc)
+        d.ellipse([tx-3, ty-th-27, tx+tw+3, ty-th-4], fill=lc)
+
+        # Spring: falling petals
+        if season == "spring":
+            random.seed(abs(int(tx)) * 7 + frame)
+            for _ in range(6):
+                px = tx + random.randint(-35, 55) - (frame * 5) % 110
+                py = ty - random.randint(-15, 45) + (frame * 2) % 45
+                d.point((int(px), int(py)), fill=(255, 105, 180, 220))
+
+    # ── 4. Season-specific atmosphere ─────────────────────────────────────────
+
+    # SPRING – wind lines + pink pollen
     if season == "spring":
-        # Wind Lines "Whooshing"
-        wind_shift = int(frame_index * 15)
-        random.seed(777)
-        for i in range(int(width / 25)): # Scale wind lines
-            wx_start = random.randint(-100, width)
-            wy = random.randint(10, slope_bottom)
-            
-            wx = (wx_start + wind_shift) % (width + 100) - 50
-            draw.line([wx, wy, wx+30, wy+2], fill=(255, 255, 255, 100), width=1)
-            
-    # Particles (Dust/Pollen)
-    if season in ["spring", "summer"]:
-        random.seed(frame_index + 100)
-        for _ in range(int(width / 8)): # Scale particles
-            dx = random.randint(0, width)
-            dy = random.randint(0, height)
-            d_col = (255, 255, 200, 150) if season=="summer" else (255, 192, 203, 150)
-            draw.point((dx, dy), fill=d_col)
+        wshift = frame * 18
+        random.seed(333)
+        for _ in range(W // 22):
+            wx0 = random.randint(-120, W)
+            wy  = random.randint(5, SLOPE_B - 5)
+            wx  = (wx0 + wshift) % (W + 120) - 60
+            d.line([wx, wy, wx + 35, wy + 2], fill=(255, 255, 255, 110), width=1)
+        random.seed(frame * 3 + 1)
+        for _ in range(W // 7):
+            dx, dy = random.randint(0, W), random.randint(0, H)
+            d.point((dx, dy), fill=(255, 182, 193, 160))
 
-    # 3. ROAD (Foreground - Scrolled)
-    draw.rectangle([0, road_top, width, road_bottom], fill=cols["road"] + (255,))
-    
-    random.seed(123) 
-    for _ in range(int(width * 2)): # Scale road texture
-        orig_rx = random.randint(-width, width * 2)
-        ry = random.randint(road_top, road_bottom)
-        rx_wrapped = (orig_rx - world_shift) % width
-        shade = random.choice([(60, 60, 60), (120, 120, 120)]) 
-        draw.point((rx_wrapped, ry), fill=shade + (255,))
+    # SUMMER – heat shimmer dots + golden pollen
+    elif season == "summer":
+        random.seed(frame * 5 + 2)
+        for _ in range(W // 6):
+            dx, dy = random.randint(0, W), random.randint(0, H)
+            d.point((dx, dy), fill=(255, 255, 180, 130))
+        # Subtle horizontal shimmer lines near road
+        random.seed(frame + 77)
+        for _ in range(8):
+            sy = random.randint(ROAD_T + 2, ROAD_B - 2)
+            sx = random.randint(0, W - 40)
+            d.line([sx, sy, sx + random.randint(15, 40), sy],
+                   fill=(255, 255, 255, 60), width=1)
 
-    # 4. SLOPE (Midground - Scrolled)
-    steps = 15
-    step_h = (slope_bottom - road_bottom) / steps
+    # AUTUMN – falling leaves + gentle wind
+    elif season == "autumn":
+        wshift = frame * 10
+        random.seed(444)
+        for _ in range(W // 28):
+            wx0 = random.randint(-80, W)
+            wy  = random.randint(5, SLOPE_B)
+            wx  = (wx0 + wshift) % (W + 80) - 40
+            d.line([wx, wy, wx + 20, wy + 3], fill=(255, 200, 100, 90), width=1)
+        # Falling leaf dots
+        random.seed(frame * 7 + 3)
+        for _ in range(W // 12):
+            lx = random.randint(0, W)
+            ly = random.randint(0, SLOPE_B)
+            leaf_col = random.choice([
+                (255, 69, 0, 200), (210, 105, 30, 200), (255, 165, 0, 200)
+            ])
+            d.rectangle([lx, ly, lx+2, ly+2], fill=leaf_col)
+
+    # WINTER – rain streaks + snowflakes
+    elif season == "winter":
+        rain_shift = frame * 14
+        random.seed(555)
+        for _ in range(W // 4):
+            rx0 = random.randint(0, W)
+            ry0 = random.randint(0, H)
+            rx  = (rx0 + rain_shift // 2) % W
+            ry  = (ry0 + rain_shift) % H
+            d.line([rx, ry, rx - 2, ry + 8], fill=(180, 210, 255, 180), width=1)
+        # Snowflakes
+        random.seed(frame * 11 + 4)
+        for _ in range(W // 25):
+            sx = random.randint(0, W)
+            sy = random.randint(0, H)
+            d.point((sx, sy), fill=(255, 255, 255, 220))
+
+    # ── 5. Road ───────────────────────────────────────────────────────────────
+    d.rectangle([0, ROAD_T, W, ROAD_B], fill=c["road"] + (255,))
+    random.seed(123)
+    for _ in range(W * 2):
+        ox = random.randint(-W, W * 2)
+        ry = random.randint(ROAD_T, ROAD_B)
+        rx = (ox - shift) % W
+        shade = random.choice([(55, 55, 55), (115, 115, 115)])
+        d.point((rx, ry), fill=shade + (255,))
+    d.line([0, ROAD_B, W, ROAD_B], fill=(40, 40, 40, 255), width=2)
+
+    # ── 6. Slope ──────────────────────────────────────────────────────────────
+    steps = 18
+    sh = (SLOPE_B - ROAD_B) / steps
     for i in range(steps):
-        sy = road_bottom + i * step_h
-        ey = sy + step_h + 1
-        factor = i / steps
-        r, g, b = cols["grass_base"]
-        shadow_intensity = 0.5 * (1 - factor)
-        r = int(r * (1 - shadow_intensity))
-        g = int(g * (1 - shadow_intensity))
-        b = int(b * (1 - shadow_intensity))
-        draw.rectangle([0, sy, width, ey], fill=(r, g, b, 255))
-        
-    draw.line([0, road_bottom, width, road_bottom], fill=(200, 200, 200, 100), width=1)
+        sy = ROAD_B + i * sh
+        ey = sy + sh + 1
+        f  = i / steps
+        r, g, b = c["grass"]
+        si = 0.5 * (1 - f)
+        d.rectangle([0, sy, W, ey],
+                    fill=(int(r*(1-si)), int(g*(1-si)), int(b*(1-si)), 255))
+    d.line([0, ROAD_B, W, ROAD_B], fill=(200, 200, 200, 90), width=1)
 
     if season != "winter":
-        random.seed(42) 
-        for _ in range(int(width / 4)): # Scale flowers
-            orig_fx = random.randint(0, width)
-            fy = random.randint(road_bottom + 2, slope_bottom - 2)
-            fx = (orig_fx - world_shift) % width
-            draw.rectangle([fx, fy, fx+2, fy+2], fill=cols["flower"] + (255,))
-            draw.line([fx+5, fy, fx+5, fy-3], fill=cols["grass_shade"]+(255,), width=1)
+        random.seed(42)
+        for _ in range(W // 4):
+            ox = random.randint(0, W)
+            fy = random.randint(ROAD_B + 2, SLOPE_B - 2)
+            fx = (ox - shift) % W
+            d.rectangle([fx, fy, fx+2, fy+2], fill=c["flower"] + (255,))
+            d.line([fx+5, fy, fx+5, fy-4], fill=c["shade"] + (255,), width=1)
+    else:
+        # Snow on slope
+        random.seed(77)
+        for _ in range(W // 6):
+            ox = random.randint(0, W)
+            fy = random.randint(ROAD_B + 1, SLOPE_B - 1)
+            fx = (ox - shift) % W
+            d.point((fx, fy), fill=(255, 255, 255, 200))
 
-    # 5. RIVER (Bottom - Scrolled)
-    draw.rectangle([0, slope_bottom, width, height], fill=cols["river"] + (255,))
-    river_flow = frame_index * 10
-    if season == "winter": river_flow = 0
+    # ── 7. River ──────────────────────────────────────────────────────────────
+    d.rectangle([0, SLOPE_B, W, H], fill=c["river"] + (255,))
+    rflow = 0 if season == "winter" else frame * 10
     random.seed(55)
-    for i in range(int(width / 5)): # Scale river lines
-        orig_lx = random.randint(0, width)
-        y = random.randint(slope_bottom + 2, height - 2)
-        lw = random.randint(10, 30)
-        lx = (orig_lx - river_flow) % width
-        l_col = (255, 255, 255, 120)
-        draw.line([lx, y, lx+lw, y], fill=l_col, width=1)
+    for _ in range(W // 5):
+        ox = random.randint(0, W)
+        ry = random.randint(SLOPE_B + 2, H - 2)
+        lw = random.randint(10, 35)
+        lx = (ox - rflow) % W
+        d.line([lx, ry, lx + lw, ry], fill=(255, 255, 255, 110), width=1)
+    if season == "winter":
+        # Ice cracks
+        random.seed(88)
+        for _ in range(W // 30):
+            ix = random.randint(0, W)
+            iy = random.randint(SLOPE_B + 2, H - 2)
+            d.line([ix, iy, ix + random.randint(5, 15), iy + random.randint(-2, 2)],
+                   fill=(200, 230, 255, 150), width=1)
 
-    # 6. AVATAR (Refined Legs & Animation)
-    cx = width // 2
-    foot_y = road_bottom - 4
-    
-    skin_c = hex_to_rgb("#8D5524")
-    hair_c = hex_to_rgb("#090806")
-    # Change Summer Pants/Shirt to match request "change yellow cloth"
-    pants_c = (0, 0, 139) # Blue jeans default
-    
-    shirt_colors = {
-        "spring": (144, 238, 144), 
-        "summer": (0, 191, 255), # Deep Sky Blue (No more Yellow)
-        "autumn": (139, 69, 19), 
-        "winter": (178, 34, 34)
+    # ── 8. Avatar ─────────────────────────────────────────────────────────────
+    cx   = W // 2
+    foot = ROAD_B - 4
+    skin = hex_to_rgb("#8D5524")
+    hair = hex_to_rgb("#1A0A00")
+    blue_jeans = (30, 30, 140, 255)
+
+    shirts = {
+        "spring": (144, 238, 144, 255),
+        "summer": (0, 191, 255, 255),
+        "autumn": (139, 69, 19, 255),
+        "winter": (60, 80, 200, 255),   # raincoat – blue
     }
-    shirt_c = hex_to_rgb(str(shirt_colors[season])) if isinstance(shirt_colors[season], str) else shirt_colors[season]
+    shirt = shirts[season]
 
-    # Helper for Two-Segment Limb (Thigh thicker than Calf)
-    def draw_leg(hip_x, hip_y, angle, length, color, pants_c):
-        # Angle in degrees
+    # Walk cycle
+    t = (frame % 8) / 8.0
+    hip_x, hip_y = cx, foot - 22
+
+    r_leg = 35 * math.sin(t * 2 * math.pi)
+    l_leg = 35 * math.sin(t * 2 * math.pi + math.pi)
+
+    def leg(hx, hy, angle, col):
         rad = math.radians(angle)
-        
-        # Thigh (Thicker)
-        thigh_len = length // 2 + 2
-        knee_x = hip_x + thigh_len * math.sin(rad)
-        knee_y = hip_y + thigh_len * math.cos(rad)
-        
-        draw.line([hip_x, hip_y, knee_x, knee_y], fill=pants_c, width=6) # Thigh Thickness 6
-        
-        # Calf (Thinner)
-        # Simple straight leg for now (or slight bend if back leg)
-        # Let's add slight bend offset for fluidity
-        bend = 0
-        if angle > 0: bend = -10 # Back leg bends
-        
+        kx = hx + 8 * math.sin(rad)
+        ky = hy + 8 * math.cos(rad)
+        d.line([hx, hy, kx, ky], fill=col, width=6)   # thigh
+        bend = -12 if angle > 0 else 0
         rad2 = math.radians(angle + bend)
-        calf_len = length // 2 + 2
-        foot_x = knee_x + calf_len * math.sin(rad2)
-        foot_y = knee_y + calf_len * math.cos(rad2)
-        
-        draw.line([knee_x, knee_y, foot_x, foot_y], fill=pants_c, width=4) # Calf Thickness 4
-        return foot_x, foot_y
-        
-    cycle_pct = (frame_index % 8) / 8.0
-    hip_x, hip_y = cx, foot_y - 22 
-    
-    # Angles
-    r_leg_angle = 35 * math.sin(cycle_pct * 2 * math.pi)
-    l_leg_angle = 35 * math.sin(cycle_pct * 2 * math.pi + math.pi)
-    
-    # Draw Legs
-    # Left (Back)
-    draw_leg(hip_x, hip_y, l_leg_angle, 12, pants_c + (255,), pants_c + (255,))
-    
+        fx = kx + 9 * math.sin(rad2)
+        fy = ky + 9 * math.cos(rad2)
+        d.line([kx, ky, fx, fy], fill=col, width=4)   # calf
+
+    # Back leg
+    leg(hip_x, hip_y, l_leg, blue_jeans)
+
     # Body
-    draw.rectangle([cx-7, hip_y-16, cx+7, hip_y], fill=shirt_c + (255,))
+    d.rectangle([cx-7, hip_y-17, cx+7, hip_y], fill=shirt)
     if season == "winter":
-        draw.line([cx-7, hip_y-12, cx+7, hip_y-12], fill=(100,0,0,255), width=2)
+        # Raincoat collar / hood hint
+        d.rectangle([cx-8, hip_y-18, cx+8, hip_y-14], fill=(40, 60, 180, 255))
 
-    # Right (Front)
-    draw_leg(hip_x, hip_y, r_leg_angle, 12, pants_c + (255,), pants_c + (255,))
+    # Front leg
+    leg(hip_x, hip_y, r_leg, blue_jeans)
 
-    # HEAD
-    head_y = hip_y - 26
-    draw.rectangle([cx-6, head_y, cx+6, head_y+11], fill=skin_c + (255,))
-    draw.rectangle([cx-7, head_y-3, cx+7, head_y+4], fill=hair_c + (255,))
-    draw.rectangle([cx-7, head_y, cx-5, head_y+9], fill=hair_c + (255,))
-    
+    # Head
+    hy2 = hip_y - 28
+    d.rectangle([cx-6, hy2, cx+6, hy2+11], fill=skin + (255,))
+    d.rectangle([cx-7, hy2-3, cx+7, hy2+4], fill=hair + (255,))
+    d.rectangle([cx-7, hy2, cx-5, hy2+9], fill=hair + (255,))
+
     if season == "winter":
-        draw.rectangle([cx-7, head_y-4, cx+7, head_y], fill=(220, 20, 60, 255)) 
+        # Rain hood
+        d.rectangle([cx-8, hy2-5, cx+8, hy2+2], fill=(40, 60, 180, 255))
 
-    # ARMS
-    # Standard stick arm is fine, maybe slightly thicker
-    r_arm_angle = 35 * math.sin(cycle_pct * 2 * math.pi + math.pi)
-    shoulder_y = hip_y - 13
-    rad_arm = math.radians(r_arm_angle)
-    elbow_x = cx + 5 * math.sin(rad_arm)
-    elbow_y = shoulder_y + 5 * math.cos(rad_arm)
-    draw.line([cx, shoulder_y, elbow_x, elbow_y], fill=shirt_c + (255,), width=4)
-    
-    hand_x = elbow_x + 5 * math.sin(rad_arm - 0.2)
-    hand_y = elbow_y + 5 * math.cos(rad_arm - 0.2)
-    draw.line([elbow_x, elbow_y, hand_x, hand_y], fill=skin_c + (255,), width=3)
+    # Arm (right, swings opposite to right leg)
+    r_arm = 35 * math.sin(t * 2 * math.pi + math.pi)
+    sho_y = hip_y - 13
+    rad_a = math.radians(r_arm)
+    ex = cx + 5 * math.sin(rad_a)
+    ey = sho_y + 5 * math.cos(rad_a)
+    d.line([cx, sho_y, ex, ey], fill=shirt, width=4)
+    hx2 = ex + 5 * math.sin(rad_a - 0.2)
+    hy3 = ey + 5 * math.cos(rad_a - 0.2)
+    d.line([ex, ey, hx2, hy3], fill=skin + (255,), width=3)
 
+    # ── Props ─────────────────────────────────────────────────────────────────
+    if season == "winter":
+        # Umbrella held in left hand (opposite arm)
+        l_arm = 35 * math.sin(t * 2 * math.pi)
+        rad_la = math.radians(l_arm)
+        lex = cx - 5 * math.sin(rad_la)
+        ley = sho_y + 5 * math.cos(rad_la)
+        # Umbrella stick
+        ux, uy = lex - 4, ley - 2
+        d.line([ux, uy, ux, uy - 18], fill=(80, 80, 80, 255), width=2)
+        # Umbrella canopy (arc approximation with ellipse)
+        d.ellipse([ux - 12, uy - 24, ux + 12, uy - 14],
+                  fill=(40, 60, 180, 230), outline=(20, 40, 160, 255))
+        # Canopy ribs
+        for rx_off in [-10, -5, 0, 5, 10]:
+            d.line([ux, uy - 19, ux + rx_off, uy - 14],
+                   fill=(20, 40, 160, 200), width=1)
+
+    elif season == "autumn":
+        # Bug-catching net
+        l_arm = 35 * math.sin(t * 2 * math.pi)
+        rad_la = math.radians(l_arm)
+        lex = cx - 5 * math.sin(rad_la)
+        ley = sho_y + 5 * math.cos(rad_la)
+        nx, ny = int(lex) + 6, int(ley) - 4
+        d.line([nx, ny, nx + 12, ny - 14], fill=(100, 60, 20, 255), width=2)
+        d.ellipse([nx + 8, ny - 20, nx + 20, ny - 8],
+                  outline=(180, 180, 180, 220), width=1)
 
     return img
 
+
 if __name__ == "__main__":
     frames = []
-    # 8 frames per season
     for season in ["spring", "summer", "autumn", "winter"]:
         for i in range(8):
-            img = draw_stardew_scene(season, i)
-            frames.append(img)
-            
-    # Save as GIF
-    output_path = "/home/abisin/Desktop/abisinraj/assets/seasons_walking.gif"
+            frames.append(draw_scene(season, i))
+
+    out = "/home/abisin/Desktop/abisinraj/assets/seasons_walking.gif"
     frames[0].save(
-        output_path,
-        save_all=True,
-        append_images=frames[1:],
-        optimize=False,
-        duration=120, 
-        loop=0
+        out, save_all=True, append_images=frames[1:],
+        optimize=False, duration=120, loop=0
     )
-    print(f"Generated Final Banner GIF at {output_path}")
+    print(f"Banner GIF saved → {out}")
