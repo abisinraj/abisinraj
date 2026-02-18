@@ -20,9 +20,12 @@
     text-align:center;
 ">
 
-<h1 style="color:white; font-weight:700; font-size:54px; letter-spacing:3px; margin:0; text-transform: uppercase;">
 ABISIN RAJ
 </h1>
+
+<div style="margin-top: 20px; text-align: center;">
+  <img src="assets/seasons_walking.gif" alt="Seasons Walking" style="width: 128px; height: 128px; border-radius: 8px; image-rendering: pixelated;" />
+</div>
 
 </div>
 
