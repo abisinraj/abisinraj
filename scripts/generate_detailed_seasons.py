@@ -51,6 +51,27 @@ def draw_scene(season, frame, W=1200, H=128):
         d.ellipse([W-55, 4, W-15, 44], fill=(255, 255, 200, 200))
 
     # ── 2. Mountains ──────────────────────────────────────────────────────────
+    # Mount Fuji (Spring only)
+    if season == "spring":
+        fuji_w = 400
+        fuji_h = 70
+        fuji_x = W // 2 - fuji_w // 2
+        fuji_y = SKY_H
+        # Main mountain body
+        d.polygon([
+            (fuji_x, fuji_y), 
+            (fuji_x + fuji_w // 2, fuji_y - fuji_h), 
+            (fuji_x + fuji_w, fuji_y)
+        ], fill=(123, 104, 238, 255)) # Medium slate blue
+        # Snow cap
+        cap_h = fuji_h // 3
+        d.polygon([
+            (fuji_x + fuji_w // 2 - fuji_w // 6, fuji_y - fuji_h + cap_h),
+            (fuji_x + fuji_w // 2, fuji_y - fuji_h),
+            (fuji_x + fuji_w // 2 + fuji_w // 6, fuji_y - fuji_h + cap_h),
+            (fuji_x + fuji_w // 2, fuji_y - fuji_h + cap_h + 5)
+        ], fill=(255, 255, 255, 255))
+
     random.seed(11)
     mx = -60
     while mx < W + 60:
@@ -148,21 +169,13 @@ def draw_scene(season, frame, W=1200, H=128):
             ])
             d.rectangle([lx, ly, lx+2, ly+2], fill=leaf_col)
 
-    # WINTER – rain streaks + snowflakes
+    # WINTER – snowflakes
     elif season == "winter":
-        rain_shift = frame * 14
-        random.seed(555)
-        for _ in range(W // 4):
-            rx0 = random.randint(0, W)
-            ry0 = random.randint(0, H)
-            rx  = (rx0 + rain_shift // 2) % W
-            ry  = (ry0 + rain_shift) % H
-            d.line([rx, ry, rx - 2, ry + 8], fill=(180, 210, 255, 180), width=1)
         # Snowflakes
         random.seed(frame * 11 + 4)
-        for _ in range(W // 25):
+        for _ in range(W // 20):
             sx = random.randint(0, W)
-            sy = random.randint(0, H)
+            sy = (random.randint(0, H) + frame * 3) % H
             d.point((sx, sy), fill=(255, 255, 255, 220))
 
     # ── 5. Road ───────────────────────────────────────────────────────────────
@@ -175,6 +188,7 @@ def draw_scene(season, frame, W=1200, H=128):
         shade = random.choice([(55, 55, 55), (115, 115, 115)])
         d.point((rx, ry), fill=shade + (255,))
     d.line([0, ROAD_B, W, ROAD_B], fill=(40, 40, 40, 255), width=2)
+# Removed duplicate line 177: d.line([0, ROAD_B, W, ROAD_B], fill=(40, 40, 40, 255), width=2)
 
     # ── 6. Slope ──────────────────────────────────────────────────────────────
     steps = 18
@@ -236,7 +250,7 @@ def draw_scene(season, frame, W=1200, H=128):
         "spring": (144, 238, 144, 255),
         "summer": (0, 191, 255, 255),
         "autumn": (139, 69, 19, 255),
-        "winter": (60, 80, 200, 255),   # raincoat – blue
+        "winter": (60, 80, 200, 255),
     }
     shirt = shirts[season]
 
@@ -263,9 +277,6 @@ def draw_scene(season, frame, W=1200, H=128):
 
     # Body
     d.rectangle([cx-7, hip_y-17, cx+7, hip_y], fill=shirt)
-    if season == "winter":
-        # Raincoat collar / hood hint
-        d.rectangle([cx-8, hip_y-18, cx+8, hip_y-14], fill=(40, 60, 180, 255))
 
     # Front leg
     leg(hip_x, hip_y, r_leg, blue_jeans)
@@ -275,10 +286,6 @@ def draw_scene(season, frame, W=1200, H=128):
     d.rectangle([cx-6, hy2, cx+6, hy2+11], fill=skin + (255,))
     d.rectangle([cx-7, hy2-3, cx+7, hy2+4], fill=hair + (255,))
     d.rectangle([cx-7, hy2, cx-5, hy2+9], fill=hair + (255,))
-
-    if season == "winter":
-        # Rain hood
-        d.rectangle([cx-8, hy2-5, cx+8, hy2+2], fill=(40, 60, 180, 255))
 
     # Arm (right, swings opposite to right leg)
     r_arm = 35 * math.sin(t * 2 * math.pi + math.pi)
@@ -318,24 +325,7 @@ def draw_scene(season, frame, W=1200, H=128):
         if i % 2 == 0:
             d.line([nx + 3, ny - 6, nx + 7, ny - 4], fill=(255, 255, 255, 180), width=1)
 
-    if season == "winter":
-        # Umbrella held in left hand (opposite arm)
-        l_arm = 35 * math.sin(t * 2 * math.pi)
-        rad_la = math.radians(l_arm)
-        lex = cx - 5 * math.sin(rad_la)
-        ley = sho_y + 5 * math.cos(rad_la)
-        # Umbrella stick
-        ux, uy = lex - 4, ley - 2
-        d.line([ux, uy, ux, uy - 18], fill=(80, 80, 80, 255), width=2)
-        # Umbrella canopy (arc approximation with ellipse)
-        d.ellipse([ux - 12, uy - 24, ux + 12, uy - 14],
-                  fill=(40, 60, 180, 230), outline=(20, 40, 160, 255))
-        # Canopy ribs
-        for rx_off in [-10, -5, 0, 5, 10]:
-            d.line([ux, uy - 19, ux + rx_off, uy - 14],
-                   fill=(20, 40, 160, 200), width=1)
-
-    elif season == "autumn":
+    if season == "autumn":
         # Bug-catching net
         l_arm = 35 * math.sin(t * 2 * math.pi)
         rad_la = math.radians(l_arm)
