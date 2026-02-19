@@ -292,6 +292,32 @@ def draw_scene(season, frame, W=1200, H=128):
     d.line([ex, ey, hx2, hy3], fill=skin + (255,), width=3)
 
     # ── Props ─────────────────────────────────────────────────────────────────
+    # Walkman (small blue rectangle on hip)
+    wm_x, wm_y = cx + 4, hip_y - 10
+    d.rectangle([wm_x, wm_y, wm_x + 4, wm_y + 6], fill=(20, 40, 150, 255)) # Blue Walkman
+    
+    # Headphones (headband and ear cups)
+    # Headband
+    d.arc([cx-7, hy2-4, cx+7, hy2+4], start=180, end=0, fill=(40, 40, 40, 255), width=2)
+    # Ear cups
+    d.rectangle([cx-8, hy2+4, cx-5, hy2+9], fill=(20, 20, 20, 255))
+    d.rectangle([cx+5, hy2+4, cx+8, hy2+9], fill=(20, 20, 20, 255))
+    
+    # Wire (from walkman to ear cup)
+    d.line([wm_x + 2, wm_y, cx + 6, hy2 + 7], fill=(30, 30, 30, 180), width=1)
+
+    # Musical Notes (floating near head)
+    random.seed(frame + 100)
+    for i in range(2):
+        nx_off = 15 + i * 12
+        ny_off = -10 - (frame % 4) * 2 - i * 5
+        nx, ny = cx + nx_off, hy2 + ny_off
+        # Draw a simple note (dot + stem)
+        d.ellipse([nx, ny, nx + 4, ny + 3], fill=(255, 255, 255, 180))
+        d.line([nx + 3, ny + 1, nx + 3, ny - 6], fill=(255, 255, 255, 180), width=1)
+        if i % 2 == 0:
+            d.line([nx + 3, ny - 6, nx + 7, ny - 4], fill=(255, 255, 255, 180), width=1)
+
     if season == "winter":
         # Umbrella held in left hand (opposite arm)
         l_arm = 35 * math.sin(t * 2 * math.pi)
@@ -315,9 +341,9 @@ def draw_scene(season, frame, W=1200, H=128):
         rad_la = math.radians(l_arm)
         lex = cx - 5 * math.sin(rad_la)
         ley = sho_y + 5 * math.cos(rad_la)
-        nx, ny = int(lex) + 6, int(ley) - 4
-        d.line([nx, ny, nx + 12, ny - 14], fill=(100, 60, 20, 255), width=2)
-        d.ellipse([nx + 8, ny - 20, nx + 20, ny - 8],
+        nx_net, ny_net = int(lex) + 6, int(ley) - 4
+        d.line([nx_net, ny_net, nx_net + 12, ny_net - 14], fill=(100, 60, 20, 255), width=2)
+        d.ellipse([nx_net + 8, ny_net - 20, nx_net + 20, ny_net - 8],
                   outline=(180, 180, 180, 220), width=1)
 
     return img
