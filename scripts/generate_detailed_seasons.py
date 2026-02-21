@@ -313,8 +313,8 @@ def draw_scene(season, frame, W=1200, H=256):
             d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
 
     if season in ["spring", "summer"]:
-        # Fixed original x positions so each couple drifts past avatar at a known frame
-        couple_origins = [W // 2 + 180, W // 2 + 580]
+        # Fixed couples: one crosses avatar mid-animation, other stays right of screen
+        couple_origins = [W // 2 + 15 * spd, W // 2 + 15 * spd + 450]
         for ci, ox in enumerate(couple_origins):
             cpx = (ox - shift + W * 4) % W
             cpy = ROAD_B + (SLOPE_B - ROAD_B) * 2 // 3
@@ -342,8 +342,8 @@ def draw_scene(season, frame, W=1200, H=256):
             d.line([cpx, cpy - 18, cpx, cpy - 2], fill=(110, 70, 40, 255), width=2)
 
             # -- Rising heart from couple: rises 5px per frame, fades out, resets each cycle --
-            h_rise  = (frame * 5) % 40          # 0..35 over 8 frames
-            h_alpha = max(20, 230 - h_rise * 6)
+            h_rise  = (frame * 4) % 50          # 0..50 over 16 frames
+            h_alpha = max(20, 230 - h_rise * 5)
             h_y     = cpy - 60 - h_rise
             draw_pixel_heart(cpx, h_y, size=2, color=(255, 80, 110, h_alpha))
 
@@ -353,14 +353,14 @@ def draw_scene(season, frame, W=1200, H=256):
         for ox in couple_origins:
             cpx = (ox - shift + W * 4) % W
             dist = abs(cpx - avatar_x)
-            if dist < 70:
-                prox = (70 - dist) / 70.0          # 0→1 as couple crosses avatar
-                av_heart_y = foot_y - 20 - int(prox * 22)
-                if prox >= 0.65:
-                    bp = (prox - 0.65) / 0.35      # 0→1 for break animation
-                    draw_broken_heart(avatar_x, av_heart_y, bp, size=2)
+            if dist < 90:
+                prox = (90 - dist) / 90.0          # 0→1 as couple crosses avatar
+                av_heart_y = foot_y - 20 - int(prox * 28)
+                if prox >= 0.60:
+                    bp = min(1.0, (prox - 0.60) / 0.40)  # 0→1 for break animation
+                    draw_broken_heart(avatar_x, av_heart_y, bp, size=3)
                 else:
-                    draw_pixel_heart(avatar_x, av_heart_y, size=2,
+                    draw_pixel_heart(avatar_x, av_heart_y, size=3,
                                      color=(255, 90, 120, int(240 * prox)))
 
     # ── 8. Avatar ─────────────────────────────────────────────────────────────
@@ -467,12 +467,12 @@ def draw_scene(season, frame, W=1200, H=256):
 if __name__ == "__main__":
     frames = []
     for season in ["spring", "summer", "autumn", "winter"]:
-        for i in range(8):
+        for i in range(16):
             frames.append(draw_scene(season, i))
 
     out = "/home/abisin/Desktop/abisinraj/assets/seasons_walking.gif"
     frames[0].save(
         out, save_all=True, append_images=frames[1:],
-        optimize=False, duration=150, loop=0
+        optimize=False, duration=180, loop=0
     )
     print(f"Banner GIF saved → {out}")
