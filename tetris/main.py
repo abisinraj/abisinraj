@@ -65,12 +65,12 @@ def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_he
 
 
 def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Optional[str], int]], output_path: str, theme: str, year_range: str):
-    width = 53  # 53 weeks
+    width = 54  # 54 weeks to ensure no clipping
     height = 7  # 7 days per week
     cell_size = 40
     legend_width = 80
     image_width = width * cell_size + legend_width
-    image_height = height * cell_size + 60  # Extra bottom padding so Saturday row isn't clipped
+    image_height = height * cell_size + 80  # Increased padding for Saturday row visibility
 
     # Theme Configuration
     class Theme(TypedDict):
@@ -82,12 +82,12 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
         'light': {
             'background': '#ffffff',
             'text': (36, 41, 47),
-            'colors': ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']
+            'colors': ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127', '#103d19']
         },
         'dark': {
             'background': '#0d1117',
             'text': (201, 209, 217), # GitHub Dark Text
-            'colors': ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']
+            'colors': ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353', '#72ff88']
         }
     }
     
@@ -100,18 +100,19 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     grid: List[List[int]] = [[0] * height for _ in range(width)]
 
     # Prepare batches by color level
-    batches: List[List[Tuple[int, int, int]]] = [[] for _ in range(5)]
+    batches: List[List[Tuple[int, int, int]]] = [[] for _ in range(6)]
     for i, (date, count) in enumerate(contributions):
         week = i // 7
         day = i % 7
         if week >= width: break
         
-        # Map count to color index (0-4)
+        # Map count to color index (0-5)
         if count == 0: val = 0
-        elif count <= 3: val = 1
-        elif count <= 6: val = 2
-        elif count <= 9: val = 3
-        else: val = 4
+        elif count <= 10: val = 1
+        elif count <= 20: val = 2
+        elif count <= 30: val = 3
+        elif count <= 40: val = 4
+        else: val = 5
         
         if date:
             batches[val].append((week, day, val))
@@ -196,7 +197,7 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                         assigned[x+dx][y+dy] = True
                         # Find the color value for this cell
                         cell_val = 1
-                        for l in range(1, 5):
+                        for l in range(1, 6):
                             for cx, cy, cv in batches[l]:
                                 if cx == x+dx and cy == y+dy: cell_val = cv
                         shape_cells.append((x+dx, y+dy, cell_val))
