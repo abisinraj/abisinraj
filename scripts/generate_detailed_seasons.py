@@ -608,7 +608,7 @@ def draw_scene(season, frame, W=1200, H=320):
                        fill=(200, 230, 255, 150), width=1)
                        
         # ── 7.5 River Activities ──────────────────────────────────────────────────
-        if season in ["spring", "summer"] and (5 <= hour < 20):
+        if season in ["spring", "summer"] and (6 <= hour < 19):
             # People fishing
             random.seed(999) 
             for _ in range(3):
@@ -680,7 +680,7 @@ def draw_scene(season, frame, W=1200, H=320):
                 ry = hy + (py - 3) * size - rise
                 d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
 
-        if season in ["spring", "summer"] and (5 <= hour < 20):
+        if season in ["spring", "summer"] and (6 <= hour < 19):
             # Fixed couples: one crosses avatar mid-animation, other stays right of screen
             couple_origins = [W // 2 + 15 * spd, W // 2 + 15 * spd + 450]
             for ci, ox in enumerate(couple_origins):
@@ -852,7 +852,7 @@ def draw_scene(season, frame, W=1200, H=320):
     if season != "wasteland":
         near_couple = False
         couple_prox = 0.0
-        if season in ["spring", "summer"] and (5 <= hour < 20):
+        if season in ["spring", "summer"] and (6 <= hour < 19):
             spd_local = {"spring": 3, "summer": 6}.get(season, 6)
             couple_origins_check = [W // 2 + 15 * spd_local, W // 2 + 15 * spd_local + 450]
             shift_check = frame * spd_local
