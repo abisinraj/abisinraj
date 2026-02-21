@@ -658,49 +658,50 @@ def draw_scene(season, frame, W=1200, H=320):
 
         # --- Captain America "On your left" in Summer ---
         if season == "summer":
-            # Running very fast across the screen, passing the avatar
-            cap_x = -400 + frame * 160
-            cap_y = ROAD_B + 40  # Well in the foreground (passed on the left)
+            # Running very fast across the screen from left to right, passing on the "left" (background)
+            cap_x = -500 + frame * 175
+            cap_y = ROAD_T + 15
             
-            # Legs running (fast sprint pace)
-            run_t = (frame % 4) / 4.0
-            r_leg_x = 25 * math.sin(run_t * 2 * math.pi)
-            l_leg_x = 25 * math.sin((run_t + 0.5) * 2 * math.pi)
-            
-            # Blue Jeans
-            d.line([cap_x, cap_y-8, cap_x + int(r_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
-            d.line([cap_x, cap_y-8, cap_x + int(l_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
-            
-            # Running Shoes
-            d.rectangle([cap_x + int(r_leg_x) - 4, cap_y+5, cap_x + int(r_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
-            d.rectangle([cap_x + int(l_leg_x) - 4, cap_y+5, cap_x + int(l_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
+            if -100 < cap_x < W + 100:
+                # Legs running (sprint pace)
+                run_t = (frame % 4) / 4.0
+                r_leg_x = 20 * math.sin(run_t * 2 * math.pi)
+                l_leg_x = 20 * math.sin((run_t + 0.5) * 2 * math.pi)
+                
+                # Blue Jeans
+                d.line([cap_x, cap_y-8, cap_x + int(r_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
+                d.line([cap_x, cap_y-8, cap_x + int(l_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
+                
+                # Running Shoes
+                d.rectangle([cap_x + int(r_leg_x) - 4, cap_y+5, cap_x + int(r_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
+                d.rectangle([cap_x + int(l_leg_x) - 4, cap_y+5, cap_x + int(l_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
 
-            # Body (Bland Grey T-Shirt)
-            d.rectangle([cap_x-9, cap_y-25, cap_x+7, cap_y-8], fill=(180, 180, 180, 255))
-            # Back Arm swinging
-            arm_x = cap_x - int(15 * math.sin(run_t * 2 * math.pi))
-            d.line([cap_x, cap_y-20, arm_x, cap_y-5], fill=(255, 210, 170, 255), width=4)
-            # Front Arm swinging
-            f_arm_x = cap_x + int(15 * math.sin(run_t * 2 * math.pi))
-            d.line([cap_x, cap_y-20, f_arm_x, cap_y-5], fill=(255, 210, 170, 255), width=4)
-            
-            # Head (Face)
-            d.ellipse([cap_x-5, cap_y-36, cap_x+6, cap_y-23], fill=(255, 210, 170, 255))
-            # Blonde Hair
-            d.polygon([
-                (cap_x-6, cap_y-33), (cap_x-2, cap_y-38), 
-                (cap_x+5, cap_y-37), (cap_x+7, cap_y-30),
-                (cap_x+3, cap_y-34), (cap_x-3, cap_y-34)
-            ], fill=(230, 200, 80, 255))
-            
-            # Dialog box "On your left"
-            bx = cap_x - 10
-            by = cap_y - 65
-            d.rectangle([bx-10, by-8, bx+75, by+10], fill=(255, 255, 255, 200), outline=(0,0,0,150))
-            # Tail of the speech bubble
-            d.polygon([(bx+15, by+10), (bx+25, by+10), (bx+10, by+18)], fill=(255, 255, 255, 200))
-            # Text!
-            d.text((bx-4, by-4), "On your left.", fill=(0, 0, 0, 255))
+                # Body (Bland Grey T-Shirt)
+                d.rectangle([cap_x-9, cap_y-25, cap_x+7, cap_y-8], fill=(180, 180, 180, 255))
+                # Arms swinging
+                arm_x = cap_x - int(12 * math.sin(run_t * 2 * math.pi))
+                d.line([cap_x, cap_y-20, arm_x, cap_y-5], fill=(255, 210, 170, 255), width=4)
+                f_arm_x = cap_x + int(12 * math.sin(run_t * 2 * math.pi))
+                d.line([cap_x, cap_y-20, f_arm_x, cap_y-5], fill=(255, 210, 170, 255), width=4)
+                
+                # Head (Face)
+                d.ellipse([cap_x-5, cap_y-36, cap_x+6, cap_y-23], fill=(255, 210, 170, 255))
+                # Blonde Hair
+                d.polygon([
+                    (cap_x-6, cap_y-33), (cap_x-2, cap_y-38), 
+                    (cap_x+5, cap_y-37), (cap_x+7, cap_y-30),
+                    (cap_x+3, cap_y-34), (cap_x-3, cap_y-34)
+                ], fill=(230, 200, 80, 255))
+                
+                # Dialog box "On your left" - visible while passing
+                if 300 < cap_x < 900:
+                    bx = cap_x - 10
+                    by = cap_y - 65
+                    d.rectangle([bx-10, by-8, bx+75, by+10], fill=(255, 255, 255, 200), outline=(0,0,0,150))
+                    # Tail of the speech bubble
+                    d.polygon([(bx+15, by+10), (bx+25, by+10), (bx+10, by+18)], fill=(255, 255, 255, 200))
+                    # Text!
+                    d.text((bx-4, by-4), "On your left.", fill=(0, 0, 0, 255))
 
     # ── 8. Avatar ─────────────────────────────────────────────────────────────
 
