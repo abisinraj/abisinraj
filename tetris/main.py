@@ -65,12 +65,12 @@ def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_he
 
 
 def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Optional[str], int]], output_path: str, theme: str, year_range: str):
-    width = 53  # Standard GitHub year width (53 weeks)
     height = 7  # 7 days per week
+    width = (len(contributions) + height - 1) // height
     cell_size = 40
     legend_width = 80
-    image_width = width * cell_size + legend_width + 20  # Extra right padding
-    image_height = height * cell_size + 100  # Extra bottom padding for Saturday row and labels
+    image_width = width * cell_size + legend_width + 20 # Reduced extra padding
+    image_height = height * cell_size + 80 # Reduced vertical padding
 
     # Theme Configuration
     class Theme(TypedDict):
@@ -124,18 +124,31 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     month_labels = []
     last_m = -1
     last_x = -999  # track last label x position to prevent overlap
-    LABEL_WIDTH = 30  # approx pixel width of a 3-char label at font size 16
+    LABEL_WIDTH = 45
     for i, (date_str, count) in enumerate(contributions):
         if not date_str: continue
-        m = datetime.strptime(date_str, '%Y-%m-%d').month
+        d_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        m = d_obj.month
         if m != last_m:
-            x = (i // 7) * cell_size + 80
-            # If too close to previous label, nudge right just enough to clear it
-            if x < last_x + LABEL_WIDTH + 4:
-                x = last_x + LABEL_WIDTH + 4
-            month_labels.append((x, month_names[m-1]))
-            last_x = x
+            x = (i // 7) * cell_size + legend_width
+            if x > last_x + LABEL_WIDTH:
+                month_labels.append((x, month_names[m-1]))
+                last_x = x
             last_m = m
+
+    # Debug: verify last few days coordinates
+    print("Debug - Last 21 days positioning:")
+    first_week_with_data = width
+    for i in range(len(contributions)):
+        d, c = contributions[i]
+        if c > 0:
+            first_week_with_data = min(first_week_with_data, i // 7)
+        if i >= len(contributions)-21:
+            w, dy = i // 7, i % 7
+            print(f"  {d} -> Grid[{w}][{dy}] = {grid[w][dy]}")
+    
+    if first_week_with_data == width: first_week_with_data = 0
+    print(f"First week with data: {first_week_with_data}")
 
     # ... in loops replace draw_legend calls:
     # draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
@@ -209,11 +222,11 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                         "min_y": min(c[1] for c in shape_cells),
                         "max_y": max(c[1] for c in shape_cells),
                         "min_x": min(c[0] for c in shape_cells),
-                        "start_frame": x * 2
+                        "start_frame": max(0, (x - first_week_with_data)) * 4 # Optimized cascade
                     })
                     break
 
-    max_frames = width * 2 + height + 10
+    max_frames = width * 10 # More than enough
     
     # Store current falling y offsets
     for p in final_pieces:
@@ -221,12 +234,8 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
 
     print(f"  Animating {len(final_pieces)} group pieces...")
     for frame in range(max_frames):
+        # --- 1. UPDATE STATE FIRST ---
         moved_any = False
-        img = Image.new('RGB', (image_width, image_height), background_color)
-        draw = ImageDraw.Draw(img)
-        draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
-        draw_grid(draw, animated_grid, cell_size, colors, theme_colors)
-        
         for p in final_pieces:
             if frame >= p["start_frame"]:
                 if p["curr_y_offset"] < 0:
@@ -239,27 +248,38 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
                     p["landed"] = True
                     moved_any = True
         
-        # Draw falling pieces
+        # --- 2. DRAW AFTER STATE UPDATE ---
+        img = Image.new('RGB', (image_width, image_height), background_color)
+        draw = ImageDraw.Draw(img)
+        draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
+        draw_grid(draw, animated_grid, cell_size, colors, theme_colors)
+        
+        # Draw falling pieces (still in the air)
         for p in final_pieces:
             if frame >= p["start_frame"] and p["curr_y_offset"] < 0:
                 for cx, cy, cv in p["cells"]:
                     x0 = cx * cell_size + legend_width + 2
                     y0 = (cy + p["curr_y_offset"]) * cell_size + 40 + 2
-                    if y0 >= 40: # Only draw if it's on the board
-                        x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-                        draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[cv], outline=(255, 255, 255, 50))
+                    # Define clip box to only show pieces within the grid vertically
+                    x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
+                    if y1 > 40: # Only draw if part of the cell is below the header
+                        draw.rounded_rectangle([x0, max(40, y0), x1, y1], radius=8, fill=colors[cv], outline=(255, 255, 255, 50))
                         
-        if moved_any:
-            frames.append(img)
+        # --- 3. APPEND FRAME ---
+        frames.append(img)
+
         # End early if all pieces have landed
-        if all(p.get("landed") for p in final_pieces):
+        if len(final_pieces) > 0 and all(p.get("landed") for p in final_pieces):
+            # Add a 10-second static pause of the COMPLETE final image
+            for _ in range(100):
+                frames.append(img.copy())
             break
 
 
     # Save as animated GIF
     if len(frames) == 0:
         raise Exception("No frames generated. Check contribution data.")
-    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=150, loop=0)
+    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=True, duration=100, loop=0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a GitHub contributions Tetris GIF.')
@@ -286,38 +306,33 @@ if __name__ == "__main__":
         today = datetime.now()
         # GitHub graph ends on the current Saturday (or today if Saturday)
         # and starts 52 weeks before the prior Sunday
-        # Find the Saturday >= today
+        # Custom window: Sunday 52 weeks ago to the coming Saturday
         days_to_sat = (5 - today.weekday()) % 7
         end_date = today + timedelta(days=days_to_sat)
-        # Start from 52 weeks before the Sunday before end_date
-        start_date = end_date - timedelta(days=52 * 7 + 6)  # 53 weeks = 371 days
+        start_date = end_date - timedelta(days=52 * 7 + 6) # Sunday 53 weeks ago (total 372 days)
+        # Actually let's just make it exactly 53 weeks = 371 days
+        start_date = end_date - timedelta(days=370) # Sat - 370 = Sun
         
-        print(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+        today = datetime.now().date()
+        print(f"Date range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')} ({len(all_map)} total days in map)")
         
         rolling_contributions: List[Tuple[Optional[str], int]] = []
         d = start_date
         while d <= end_date:
             ds = d.strftime('%Y-%m-%d')
             count = all_map.get(ds, 0)
-            if d <= today:
+            if d.date() <= today:
                 rolling_contributions.append((ds, count))
             else:
-                rolling_contributions.append((None, 0))  # future padding
+                rolling_contributions.append((None, 0))
             d += timedelta(days=1)
         
-        print(f"Total days in window: {len(rolling_contributions)}")
-        with open("debug_contributions.log", "w") as f:
-            f.write(f"Date range: {start_date} to {end_date}\n")
-            for ds, c in rolling_contributions[-10:]:
-                f.write(f"{ds}: {c}\n")
-        
-        if rolling_contributions and rolling_contributions[0][0]:
-            print(f"First date: {rolling_contributions[0][0]}")
-        if rolling_contributions and rolling_contributions[-1][0]:
-            print(f"Last date: {rolling_contributions[-1][0]}")
+        print(f"Total days: {len(rolling_contributions)}")
+        print("Last 7 days:")
+        for ds, c in rolling_contributions[-7:]:
+            print(f"  {ds}: {c}")
         
         year_range = f"{current_year - 1} - {current_year}"
-        
         create_tetris_gif(args.username, current_year, rolling_contributions, args.output, args.theme, year_range)
         print("GIF created successfully!")
     except Exception as e:
