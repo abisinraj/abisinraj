@@ -256,7 +256,7 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     # Save as animated GIF
     if len(frames) == 0:
         raise Exception("No frames generated. Check contribution data.")
-    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=50, loop=0)
+    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=80, loop=0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a GitHub contributions Tetris GIF.')
