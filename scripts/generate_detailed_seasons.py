@@ -43,22 +43,58 @@ def draw_scene(season, frame, W=1200, H=320):
         spd = 3  # Serene pace for sakura
     shift = frame * spd
 
+    hour = datetime.now().hour
+    
+    # --- Time-based Atmosphere Adjustments ---
+    # Dawn: 5-7, Day: 8-16, Sunset: 17-19, Night: 20-4
+    if 5 <= hour < 8:
+        # Dawn - Purple/Pink bias
+        atmosphere_tint = (100, 50, 150, 40)
+        sky_base = hex_to_rgb("#6A5ACD") # Slate Blue
+    elif 8 <= hour < 17:
+        # Day - Standard
+        atmosphere_tint = (0, 0, 0, 0)
+        sky_base = hex_to_rgb(P[season]["sky"])
+    elif 17 <= hour < 20:
+        # Sunset - Orange/Red bias
+        atmosphere_tint = (200, 100, 0, 50)
+        sky_base = hex_to_rgb("#FF4500") # Orange Red
+    else:
+        # Night - Dark Blue/Black bias
+        atmosphere_tint = (0, 0, 80, 100)
+        sky_base = hex_to_rgb("#000033") # Midnight Blue
+
     # ── 1. Sky ────────────────────────────────────────────────────────────────
-    d.rectangle([0, 0, W, SKY_H], fill=c["sky"] + (255,))
+    # Blend season sky with time-based sky (50/50 blend)
+    s_sky = hex_to_rgb(P[season]["sky"])
+    final_sky = tuple(int((s_sky[i] + sky_base[i]) / 2) for i in range(3))
+    
+    d.rectangle([0, 0, W, SKY_H], fill=final_sky + (255,))
 
     if season == "wasteland":
         # Arid haze
         for y in range(0, SKY_H, 4):
             alpha = int(100 * (1 - y/SKY_H))
-            d.rectangle([0, y, W, y+4], fill=(255, 100, 0, alpha))
+            if 17 <= hour < 20: # Golden hour haze
+                d.rectangle([0, y, W, y+4], fill=(255, 200, 0, alpha))
+            elif hour >= 20 or hour < 5: # Night haze
+                d.rectangle([0, y, W, y+4], fill=(0, 0, 100, alpha))
+            else:
+                d.rectangle([0, y, W, y+4], fill=(255, 100, 0, alpha))
     
 
     # Sun / Moon
-    if season == "winter":
-        d.ellipse([W-55, 4, W-15, 44], fill=(220, 230, 255, 200))  # pale moon
-    elif season == "autumn":
-        d.ellipse([W-55, 4, W-15, 44], fill=(255, 140, 0, 200))
+    if hour >= 20 or hour < 6:
+        # Moon
+        d.ellipse([W-55, 10, W-15, 50], fill=(220, 230, 255, 200))
+        # Crescent effect
+        d.ellipse([W-45, 10, W-5, 50], fill=final_sky + (255,))
+    elif 6 <= hour < 8 or 17 <= hour < 20:
+        # Low Sun (Orange/Red)
+        sun_y = 10 if hour < 8 else 30
+        d.ellipse([W-55, sun_y, W-15, sun_y + 40], fill=(255, 100, 0, 220))
     else:
+        # High Sun
         d.ellipse([W-55, 4, W-15, 44], fill=(255, 255, 200, 200))
 
     # ── 2. Mountains ──────────────────────────────────────────────────────────
