@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw
 import random
 import math
+from datetime import datetime
 
 def hex_to_rgb(h):
     h = h.lstrip('#')
@@ -857,6 +858,62 @@ def draw_scene(season, frame, W=1200, H=320):
         d.line([nx_net, ny_net, nx_net + 12, ny_net - 14], fill=(100, 60, 20, 255), width=2)
         d.ellipse([nx_net + 8, ny_net - 20, nx_net + 20, ny_net - 8],
                   outline=(180, 180, 180, 220), width=1)
+
+    if season == "wasteland":
+        # ── Greeting Speech Bubble ──
+        hour = datetime.now().hour
+        
+        # Unique 24-hour greetings with additional dialog
+        # Format: {hour: (Base Greeting, Additional Dialog)}
+        hour_data = {
+            0: ("Midnight patrol...", "Wasteland never sleeps."),
+            1: ("Too early for training...", "Stay in the shadows."),
+            2: ("Dead silence...", "Just the wind and me."),
+            3: ("Ghostly hour...", "Shadows are moving."),
+            4: ("Dawn is near...", "Searching for light."),
+            5: ("Early start...", "Gotta keep moving."),
+            6: ("Good Morning!", "Ready to train?"),
+            7: ("Morning rays...", "Heat's building up."),
+            8: ("Stay focused.", "The waste is unforgiving."),
+            9: ("Morning patrol...", "Scavenging for parts."),
+            10: ("Sun's high already.", "Stay hydrated out here."),
+            11: ("Almost noon...", "Finding some shade."),
+            12: ("Good Afternoon!", "The heat is a trial."),
+            13: ("Scorching sun...", "Efficiency matters."),
+            14: ("Peak heat.", "Test of endurance."),
+            15: ("Afternoon dust...", "Eyes on the horizon."),
+            16: ("Day's halfway done.", "Results are coming."),
+            17: ("Sun's dipping.", "Glow of the ruins."),
+            18: ("Good Evening!", "Sky looks like amber."),
+            19: ("Sunset vibes...", "Night's approaching."),
+            20: ("Twilight wanderer.", "Cooling down at last."),
+            21: ("Dusk patrol...", "Fire up the lantern."),
+            22: ("Night falls fast.", "Watch your step."),
+            23: ("End of the day.", "Reflect and reboot.")
+        }
+        
+        base, extra = hour_data.get(hour, ("Hello!", "Keep walking."))
+        
+        # Alternate greeting every 8 frames (since we have 16 frames total)
+        greeting = base if frame < 8 else extra
+            
+        # Draw bubble near head
+        try:
+            text_w = d.textlength(greeting)
+        except AttributeError:
+            text_w = len(greeting) * 7
+            
+        bx = cx - 20
+        by = hy2 - 35
+        bubble_w = text_w + 10
+        bubble_h = 18
+        
+        # Speech bubble background
+        d.rectangle([bx, by, bx + bubble_w, by + bubble_h], fill=(255, 255, 255, 220), outline=(0,0,0,180))
+        # tail
+        d.polygon([(cx, by + bubble_h), (cx + 10, by + bubble_h), (cx + 5, by + bubble_h + 6)], fill=(255, 255, 255, 220))
+        # Text
+        d.text((bx + 5, by + 2), greeting, fill=(0, 0, 0, 255))
 
     return img
 

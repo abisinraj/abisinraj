@@ -1,8 +1,8 @@
-name: Generate Tetris GIF
+name: Generate GIFs
 
 on:
   schedule:
-    - cron: "0 */12 * * *" # Runs every 12 hours
+    - cron: "0 * * * *" # Runs every hour
   workflow_dispatch:
   push:
     branches:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  generate-tetris:
+  generate-gifs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,23 +22,27 @@ jobs:
         with:
           python-version: '3.x'
           
-
       - name: Install Dependencies
         run: |
-          pip install -r tetris/requirements.txt
+          pip install requests Pillow
           
       - name: Create dist directory
         run: mkdir -p dist
 
-      - name: Generate GIF
+      - name: Generate Tetris GIFs
         run: |
             python3 tetris/main.py --username Abisin-Raj --theme light --output dist/github-contribution-grid-tetris.gif || { echo "Failed to generate light theme GIF"; exit 1; }
             python3 tetris/main.py --username Abisin-Raj --theme dark --output dist/github-contribution-grid-tetris-dark.gif || { echo "Failed to generate dark theme GIF"; exit 1; }
         
+      - name: Generate Seasons GIF
+        run: |
+            python3 scripts/generate_detailed_seasons.py || { echo "Failed to generate seasons GIF"; exit 1; }
+
       - name: Verify Generated Files
         run: |
           ls -l dist/github-contribution-grid-tetris.gif
           ls -l dist/github-contribution-grid-tetris-dark.gif
+          ls -l assets/seasons_walking.gif
           
       - name: Update README with Cache Buster
         run: |
@@ -46,14 +50,14 @@ jobs:
           # Fix regex to correctly escape the question mark
           sed -i "s/\.gif\?v=[0-9]*/.gif?v=$TIMESTAMP/g" README.md
           
-      - name: Commit and Push README Changes
+      - name: Commit and Push Changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add README.md
+          git add README.md assets/seasons_walking.gif
           # Pull latest changes to avoid push conflicts
           git pull --rebase origin main
-          git commit -m "chore: bust tetris gif cache [skip ci]" || echo "No changes to README"
+          git commit -m "chore: update GIFs and bust cache [skip ci]" || echo "No changes to commit"
           git push origin main
           
       - name: Push to Output Branch
