@@ -852,7 +852,7 @@ def draw_scene(season, frame, W=1200, H=320):
     if season != "wasteland":
         near_couple = False
         couple_prox = 0.0
-        if season in ["spring", "summer"]:
+        if season in ["spring", "summer"] and (5 <= hour < 20):
             spd_local = {"spring": 3, "summer": 6}.get(season, 6)
             couple_origins_check = [W // 2 + 15 * spd_local, W // 2 + 15 * spd_local + 450]
             shift_check = frame * spd_local

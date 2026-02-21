@@ -43,7 +43,7 @@ jobs:
         run: |
             python3 scripts/generate_detailed_seasons.py || { echo "Failed to generate seasons GIF"; exit 1; }
         env:
-          TIMEZONE_OFFSET: 5.5
+          TIMEZONE_OFFSET: "5.5"
 
       - name: Verify Generated Files
         run: |
@@ -55,7 +55,7 @@ jobs:
         run: |
           TIMESTAMP=$(date +%s)
           # Fix regex to correctly escape the question mark
-          sed -i "s/\.gif\?v=[0-9]*/.gif?v=$TIMESTAMP/g" README.md
+          sed -i "s/\.gif[?]v=[0-9]*/.gif?v=$TIMESTAMP/g" README.md
           
       - name: Commit and Push Changes
         run: |
