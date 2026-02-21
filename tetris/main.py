@@ -143,59 +143,119 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     # Animate each level batch
     print(f"Generating GIF for {username} - Theme: {theme}")
 
-    # Place level-0 (empty/grey) cells directly — no falling animation
-    for week, day, val in batches[0]:
-        grid[week][day] = val
+    # Animate each group of cells falling like actual pieces
+    print(f"Generating GIF for {username} - Theme: {theme}")
 
-    for level in range(1, 5):
-        batch = batches[level]
-        if not batch: continue
-        print(f"  Animating Level {level} batch ({len(batch)} blocks)...")
-        
-        # Determine max falling height in this batch
-        max_day = max(b[1] for b in batch)
-        
-        # Simultaneous falling animation
-        for step in range(max_day + 1):
-            if step % 2 != 0: continue # Adjust speed
-            
-            img = Image.new('RGB', (image_width, image_height), background_color)
-            draw = ImageDraw.Draw(img)
-            draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
-            draw_grid(draw, grid, cell_size, colors, theme_colors)
-            
-            for week, day, val in batch:
-                current_step = min(step, day)
-                x_base = week * cell_size + legend_width
-                y_base = current_step * cell_size + 40
-                
-                x0, y0 = x_base + 2, y_base + 2
-                x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-                draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[val], outline=(255, 255, 255, 50))
-            
-            frames.append(img)
+    shapes = [
+        [(0,0), (1,0), (2,0), (3,0)], [(0,0), (0,1), (0,2), (0,3)], [(0,0), (1,0), (0,1), (1,1)],
+        [(0,0), (0,1), (0,2), (1,2)], [(0,0), (1,0), (2,0), (0,1)], [(0,0), (1,0), (1,1), (1,2)], [(2,0), (0,1), (1,1), (2,1)],
+        [(1,0), (1,1), (1,2), (0,2)], [(0,0), (0,1), (1,1), (2,1)], [(0,0), (1,0), (0,1), (0,2)], [(0,0), (1,0), (2,0), (2,1)],
+        [(0,0), (1,0), (2,0), (1,1)], [(1,0), (0,1), (1,1), (1,2)], [(1,0), (0,1), (1,1), (2,1)], [(0,0), (0,1), (0,2), (1,1)],
+        [(1,0), (2,0), (0,1), (1,1)], [(0,0), (0,1), (1,1), (1,2)], [(0,0), (1,0), (1,1), (2,1)], [(1,0), (1,1), (0,1), (0,2)]
+    ]
+    normalized_shapes = []
+    for s in shapes:
+        ax = min(p[0] for p in s)
+        ay = max(p[1] for p in s if p[0] == ax)
+        normalized_shapes.append([(p[0]-ax, p[1]-ay) for p in s])
+    normalized_shapes.extend([
+        [(0,0), (1,0), (2,0)], [(0,0), (0,-1), (0,-2)], [(0,0), (1,0), (0,-1)], [(0,0), (1,0), (1,-1)], [(0,0), (0,-1), (1,-1)], [(0,0), (0,-1), (-1,-1)],
+        [(0,0), (1,0)], [(0,0), (0,-1)], [(0,0)]
+    ])
+    fixed_shapes = []
+    for norm in normalized_shapes:
+        ax = min(p[0] for p in norm)
+        ay = max(p[1] for p in norm if p[0] == ax)
+        fixed = tuple(sorted([(p[0]-ax, p[1]-ay) for p in norm]))
+        if fixed not in fixed_shapes:
+            fixed_shapes.append(fixed)
 
-        # Place blocks into grid then do a brief fade-in
-        for week, day, val in batch:
-            grid[week][day] = val
-            
-        for alpha in range(0, 256, 128):
-            img = Image.new('RGB', (image_width, image_height), background_color)
-            draw = ImageDraw.Draw(img)
-            draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
-            draw_grid(draw, grid, cell_size, colors, theme_colors)
-            
-            for week, day, val in batch:
-                x0, y0 = week * cell_size + legend_width + 2, day * cell_size + 40 + 2
-                x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
-                draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[val], outline=(255, 255, 255, alpha))
+    # Place level-0 directly to avoid animating empty squares (save time)
+    for bx, by, v in batches[0]:
+        grid[bx][by] = v
+
+    assigned = [[False]*height for _ in range(width)]
+    for bx, by, _ in batches[0]:
+        assigned[bx][by] = True # Don't form pieces from background zeros
+
+    final_pieces = []
+    for x in range(width):
+        for y in range(height-1, -1, -1):
+            if assigned[x][y]: continue
+            placed = False
+            for shape in fixed_shapes:
+                valid = True
+                for dx, dy in shape:
+                    nx, ny = x+dx, y+dy
+                    if nx < 0 or nx >= width or ny < 0 or ny >= height or assigned[nx][ny]:
+                        valid = False
+                        break
+                if valid:
+                    shape_cells = []
+                    for dx, dy in shape:
+                        assigned[x+dx][y+dy] = True
+                        # Find the color value for this cell
+                        cell_val = 1
+                        for l in range(1, 5):
+                            for cx, cy, cv in batches[l]:
+                                if cx == x+dx and cy == y+dy: cell_val = cv
+                        shape_cells.append((x+dx, y+dy, cell_val))
+                    final_pieces.append({
+                        "cells": shape_cells,
+                        "min_y": min(c[1] for c in shape_cells),
+                        "max_y": max(c[1] for c in shape_cells),
+                        "min_x": min(c[0] for c in shape_cells),
+                        "start_frame": x * 2  # Cascade from left to right!
+                    })
+                    break
+
+    max_frames = width * 2 + height + 10
+    
+    # Store current falling y offsets
+    for p in final_pieces:
+        p["curr_y_offset"] = -(p["max_y"] + 1) # Start completely above the board
+
+    print(f"  Animating {len(final_pieces)} group pieces...")
+    for frame in range(max_frames):
+        moved_any = False
+        img = Image.new('RGB', (image_width, image_height), background_color)
+        draw = ImageDraw.Draw(img)
+        draw_legend(draw, cell_size, image_width, image_height, username, year_range, theme_colors, month_labels)
+        draw_grid(draw, grid, cell_size, colors, theme_colors)
+        
+        for p in final_pieces:
+            if frame >= p["start_frame"]:
+                if p["curr_y_offset"] < 0:
+                    p["curr_y_offset"] += 1
+                    moved_any = True
+                elif p["curr_y_offset"] == 0 and not p.get("landed"):
+                    # Just landed, add to background grid
+                    for cx, cy, cv in p["cells"]:
+                        grid[cx][cy] = cv
+                    p["landed"] = True
+                    moved_any = True
+        
+        # Draw falling pieces
+        for p in final_pieces:
+            if frame >= p["start_frame"] and p["curr_y_offset"] < 0:
+                for cx, cy, cv in p["cells"]:
+                    x0 = cx * cell_size + legend_width + 2
+                    y0 = (cy + p["curr_y_offset"]) * cell_size + 40 + 2
+                    if y0 >= 40: # Only draw if it's on the board
+                        x1, y1 = x0 + cell_size - 4, y0 + cell_size - 4
+                        draw.rounded_rectangle([x0, y0, x1, y1], radius=8, fill=colors[cv], outline=(255, 255, 255, 50))
+                        
+        if moved_any:
             frames.append(img)
+        # End early if all pieces have landed
+        if all(p.get("landed") for p in final_pieces):
+            break
 
 
     # Save as animated GIF
     if len(frames) == 0:
         raise Exception("No frames generated. Check contribution data.")
-    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=20, loop=0)
+    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=50, loop=0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a GitHub contributions Tetris GIF.')
