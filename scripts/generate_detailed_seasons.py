@@ -329,10 +329,6 @@ def draw_scene(season, frame, W=1200, H=320):
             # Head
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
-            # Eyes
-            d.rectangle([x-4, y-24, x-2, y-22], fill=(0, 0, 0, 255))
-            d.rectangle([x+2, y-24, x+4, y-22], fill=(0, 0, 0, 255))
-
             # Forward arm (punching forward)
             d.line([x+dr*8, y-13, x+dr*24, y-11], fill=suit, width=5)
             fx0, fx1 = sorted([x+dr*23, x+dr*29])
