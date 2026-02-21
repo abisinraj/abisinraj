@@ -20,6 +20,7 @@
     text-align:center;
 ">
 
+<h1 style="font-size:42px; font-weight:900; letter-spacing:12px; color:#fff; margin:0;">
 ABISIN RAJ
 </h1>
 
@@ -61,7 +62,7 @@ ABISIN RAJ
     text-align:center;
 ">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=15&pause=1200&color=8B949E&center=true&vCenter=true&width=600&height=40&lines=interested+in+cybersecurity.;building+things+that+make+sense.;bca+student.+mostly+curious." alt="Typing SVG" />
-  <p style="margin:20px 0 0 0; font-size:13px; color:rgba(255,255,255,0.30); line-height:1.7;">just someone who finds linux interesting and builds things on weekends.</p>
+  <p style="margin:20px auto 0 auto; font-size:13px; color:rgba(255,255,255,0.30); line-height:1.7; text-align: center;">just someone who finds linux interesting and builds things on weekends.</p>
 </div>
 
 <div style="margin-top:40px;"></div>
