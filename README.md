@@ -60,7 +60,7 @@ ABISIN RAJ
     margin:auto;
     text-align:center;
 ">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=15&pause=1200&color=8B949E&center=true&vCenter=true&width=600&height=40&lines=interested+in+cybersecurity.;building+things+that+make+sense.;cs+student.+mostly+curious." alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=15&pause=1200&color=8B949E&center=true&vCenter=true&width=600&height=40&lines=interested+in+cybersecurity.;building+things+that+make+sense.;bca+student.+mostly+curious." alt="Typing SVG" />
   <p style="margin:20px 0 0 0; font-size:13px; color:rgba(255,255,255,0.30); line-height:1.7;">just someone who finds linux interesting and builds things on weekends.</p>
 </div>
 
