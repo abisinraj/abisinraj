@@ -65,12 +65,12 @@ def draw_legend(draw: ImageDraw.Draw, cell_size: int, image_width: int, image_he
 
 
 def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Optional[str], int]], output_path: str, theme: str, year_range: str):
-    width = 54  # 54 weeks to ensure no clipping
+    width = 53  # Standard GitHub year width (53 weeks)
     height = 7  # 7 days per week
     cell_size = 40
     legend_width = 80
-    image_width = width * cell_size + legend_width
-    image_height = height * cell_size + 80  # Increased padding for Saturday row visibility
+    image_width = width * cell_size + legend_width + 20  # Extra right padding
+    image_height = height * cell_size + 100  # Extra bottom padding for Saturday row and labels
 
     # Theme Configuration
     class Theme(TypedDict):
@@ -96,9 +96,6 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     background_color = theme_colors['background']
 
     frames: List[Image.Image] = []
-    # Initialize grid with background color index (0)
-    grid: List[List[int]] = [[0] * height for _ in range(width)]
-
     # Map counts to color index (0-5)
     # 0 -> 0, 1-10 -> 1, 11-20 -> 2, 21-30 -> 3, 31-40 -> 4, 41+ -> 5
     grid: List[List[int]] = [[0] * height for _ in range(width)]
@@ -120,10 +117,7 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
         if date:
             coord_to_val[(week, day)] = val
 
-    # Print debug info for the last 14 days
-    print("Debug - Last 14 days:")
-    for ds, c in contributions[-14:]:
-        print(f"  {ds}: {c}")
+    # Debug output removed to keep logs clean
 
     # Pre-calculate month labels to avoid slow datetime parsing in animation loop
     month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -265,7 +259,7 @@ def create_tetris_gif(username: str, year: int, contributions: List[Tuple[Option
     # Save as animated GIF
     if len(frames) == 0:
         raise Exception("No frames generated. Check contribution data.")
-    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=100, loop=0)
+    frames[0].save(output_path, save_all=True, append_images=frames[1:], optimize=False, duration=150, loop=0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a GitHub contributions Tetris GIF.')
