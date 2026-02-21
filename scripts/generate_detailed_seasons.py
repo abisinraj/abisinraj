@@ -291,13 +291,19 @@ def draw_scene(season, frame, W=1200, H=320):
             suit = (255, 120, 0, 255) if is_char1 else (0, 80, 200, 255)
             skin = (255, 210, 170, 255)
             h_col = hair_colors[char_stage]
-            # Use only RGB for aura (avoid 5-tuple)
             aura_rgb = h_col[:3]
+            dir = 1 if is_char1 else -1
 
-            # Save random state so aura doesn't corrupt other drawing
+            # Detect color change frame: flash the whole body
+            is_flash = (f % 3 == 0 and f > 0)  # frame 3,6,9,12
+            if is_flash:
+                suit = h_col
+                skin = h_col[:3] + (200,)
+
+            # Save random state
             rng_state = random.getstate()
 
-            # Aura — unique seed per warrior per frame
+            # Aura
             warrior_id = 1000 if is_char1 else 2000
             random.seed(f * 13 + warrior_id)
             aura_count = 10 + char_stage * 8
@@ -307,7 +313,7 @@ def draw_scene(season, frame, W=1200, H=320):
                 ay = y + random.randint(-aura_range - 25, aura_range)
                 d.rectangle([ax-2, ay-2, ax+1, ay+1], fill=aura_rgb + (90 + char_stage * 15,))
 
-            # Ground glow under warrior (scales with stage)
+            # Ground glow
             glow_w = 12 + char_stage * 6
             glow_a = 40 + char_stage * 20
             d.ellipse([x - glow_w, y + 18, x + glow_w, y + 24],
@@ -316,31 +322,40 @@ def draw_scene(season, frame, W=1200, H=320):
             # Restore random state
             random.setstate(rng_state)
 
-            # --- Body (slightly larger scale) ---
-            # Legs (standing, slightly apart)
-            d.line([x-5, y+2, x-8, y+20], fill=suit, width=6)
-            d.rectangle([x-11, y+19, x-5, y+24], fill=(30, 30, 30, 255))  # Boot
-            d.line([x+5, y+2, x+8, y+20], fill=suit, width=6)
-            d.rectangle([x+5, y+19, x+11, y+24], fill=(30, 30, 30, 255))  # Boot
+            # --- FIGHTING STANCE ---
+            # Front leg (bent forward)
+            d.line([x+dir*3, y+2, x+dir*14, y+14], fill=suit, width=6)
+            d.line([x+dir*14, y+14, x+dir*18, y+22], fill=suit, width=5)
+            d.rectangle([x+dir*15, y+21, x+dir*22, y+26], fill=(30, 30, 30, 255))  # Boot
 
-            # Torso
+            # Back leg (extended behind)
+            d.line([x-dir*3, y+2, x-dir*12, y+16], fill=suit, width=6)
+            d.line([x-dir*12, y+16, x-dir*10, y+24], fill=suit, width=5)
+            d.rectangle([x-dir*13, y+23, x-dir*6, y+28], fill=(30, 30, 30, 255))  # Boot
+
+            # Torso (slightly angled)
             d.rectangle([x-8, y-16, x+8, y+2], fill=suit)
 
             # Head
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
-            # Eyes (two small dots)
-            d.rectangle([x-4, y-23, x-2, y-21], fill=(0, 0, 0, 255))
-            d.rectangle([x+2, y-23, x+4, y-21], fill=(0, 0, 0, 255))
+            # Eyes
+            d.rectangle([x-4, y-24, x-2, y-22], fill=(0, 0, 0, 255))
+            d.rectangle([x+2, y-24, x+4, y-22], fill=(0, 0, 0, 255))
 
-            # Arms (down at sides, fists clenched — charge-up)
-            d.line([x-8, y-13, x-12, y+4], fill=suit, width=5)
-            d.ellipse([x-15, y+2, x-9, y+8], fill=skin)  # Left fist
-            d.line([x+8, y-13, x+12, y+4], fill=suit, width=5)
-            d.ellipse([x+9, y+2, x+15, y+8], fill=skin)  # Right fist
+            # Forward arm (punching forward)
+            d.line([x+dir*8, y-13, x+dir*24, y-11], fill=suit, width=5)
+            fx0, fx1 = sorted([x+dir*23, x+dir*29])
+            d.ellipse([fx0, y-14, fx1, y-8], fill=skin)  # Fist
+
+            # Guard arm (bent, guarding chest)
+            d.line([x-dir*8, y-13, x-dir*12, y-6], fill=suit, width=5)
+            d.line([x-dir*12, y-6, x-dir*6, y-2], fill=suit, width=4)
+            gx0, gx1 = sorted([x-dir*8, x-dir*3])
+            d.ellipse([gx0, y-4, gx1, y+1], fill=skin)  # Fist
 
             # --- Spiky Hair ---
-            ht = y - 28  # top of head
+            ht = y - 28
             if char_stage == 0:
                 d.polygon([
                     (x-7, ht), (x-5, ht-10), (x-2, ht-5),
@@ -361,7 +376,6 @@ def draw_scene(season, frame, W=1200, H=320):
                         (x+2, ht-34), (x+5, ht-12),
                         (x+9, ht-20), (x+11, ht)
                     ], fill=h_col)
-                    # Long hair strands behind (thin lines, not a rectangle)
                     for sx in range(-7, 8, 3):
                         d.line([x+sx, ht, x+sx, y+8], fill=h_col, width=2)
                 else:
