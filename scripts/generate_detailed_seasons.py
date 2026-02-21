@@ -276,7 +276,8 @@ def draw_scene(season, frame, W=1200, H=256):
             fx = random.randint(0, W)
             fy = random.randint(SLOPE_B, H)
             d.point((fx, fy), fill=(139, 69, 19, 80))
-        # ── Fighting Warriors ──────────
+            
+        # ── Flying Warriors ──────────
         stage = min(4, frame // 3)
         hair_colors = [
             (255, 255, 0, 255),   # Yellow
@@ -287,190 +288,184 @@ def draw_scene(season, frame, W=1200, H=256):
         ]
         
         def draw_warrior(x, y, char_stage, is_char1, f):
-            direction = 1 if is_char1 else -1
             suit = (255, 120, 0, 255) if is_char1 else (0, 80, 200, 255)
             skin = (255, 210, 170, 255)
             h_col = hair_colors[char_stage]
             
-            # Leg movement
-            leg_y = y + abs(math.sin(f * 0.8) * 4)
-            d.rectangle([x-5, y-15, x+5, y], fill=suit) # Body
-            d.ellipse([x-5, y-25, x+5, y-15], fill=skin) # Head
+            # Hovering movement
+            hover = math.sin(f * 0.5 + (0 if is_char1 else math.pi)) * 5
+            wy = y + hover
+            
+            d.rectangle([x-5, wy-15, x+5, wy], fill=suit) # Body
+            d.ellipse([x-5, wy-25, x+5, wy-15], fill=skin) # Head
             
             # Hair transformation logic
             if char_stage == 0: # 1st Yellow (Short)
-                d.polygon([(x-6, y-25), (x+6, y-25), (x-4, y-34), (x, y-38), (x+4, y-34)], fill=h_col)
+                d.polygon([(x-6, wy-25), (x+6, wy-25), (x-4, wy-34), (x, wy-38), (x+4, wy-34)], fill=h_col)
             elif char_stage == 1: # 2nd Yellow (Slightly longer)
-                d.polygon([(x-7, y-25), (x+7, y-25), (x-6, y-38), (x, y-44), (x+6, y-38)], fill=h_col)
+                d.polygon([(x-7, wy-25), (x+7, wy-25), (x-6, wy-38), (x, wy-44), (x+6, wy-38)], fill=h_col)
             elif char_stage == 2: # 3rd Yellow (Even longer for Char 1)
                 if is_char1:
-                    d.polygon([(x-8, y-25), (x+8, y-25), (x-9, y-45), (x, y-55), (x+9, y-45)], fill=h_col)
-                    # Long hair down the back
-                    d.rectangle([x-10, y-25, x-4, y+5], fill=h_col)
-                else: # Char 2 stays at stage 1
-                    d.polygon([(x-7, y-25), (x+7, y-25), (x-6, y-38), (x, y-44), (x+6, y-38)], fill=h_col)
-            elif char_stage >= 3: # 4th Red / 5th Blue (Normal length)
-                d.polygon([(x-6, y-25), (x+6, y-25), (x-4, y-34), (x, y-38), (x+4, y-34)], fill=h_col)
+                    d.polygon([(x-8, wy-25), (x+8, wy-25), (x-9, wy-45), (x, wy-55), (x+9, wy-45)], fill=h_col)
+                    d.rectangle([x-10, wy-25, x-4, wy+5], fill=h_col)
+                else: 
+                    d.polygon([(x-7, wy-25), (x+7, wy-25), (x-6, wy-38), (x, wy-44), (x+6, wy-38)], fill=h_col)
+            elif char_stage >= 3: # 4th Red / 5th Blue
+                d.polygon([(x-6, wy-25), (x+6, wy-25), (x-4, wy-34), (x, wy-38), (x+4, wy-34)], fill=h_col)
 
-            # Punching animation
-            atk = (f % 4) < 2
-            if atk:
-                d.line([x+direction*5, y-18, x+direction*28, y-18], fill=skin, width=4)
-            else:
-                d.line([x+direction*5, y-18, x+direction*12, y-10], fill=skin, width=4)
+            # Arms (relaxed/flight pose)
+            d.line([x-7, wy-12, x-10, wy-2], fill=skin, width=3)
+            d.line([x+7, wy-12, x+10, wy-2], fill=skin, width=3)
 
-            # Aura (sparks)
+            # Pixelated Aura
             random.seed(f + x)
-            for _ in range(5):
-                ax = x + random.randint(-20, 20)
-                ay = y - random.randint(0, 50)
-                d.point((ax, ay), fill=h_col)
+            for _ in range(8):
+                ax = x + random.randint(-22, 22)
+                ay = wy - random.randint(-5, 45)
+                # Drawing small rectangles for pixelated look
+                d.rectangle([ax-1, ay-1, ax+1, ay+1], fill=h_col)
 
-        # Draw the two warriors fighting in the center
-        cx = W // 2
-        wy = ROAD_B - 5
+        # Draw the two warriors flying around in the sky
+        wy_base = SKY_H - 40
+        # Gentle flight paths
+        c1_x = (W // 2 - 150) + math.cos(frame * 0.3) * 60
+        c2_x = (W // 2 + 150) + math.sin(frame * 0.3) * 60
         
-        # Char 1 stage
         c1_stage = stage
-        # Char 2 stage (doesn't have 3rd yellow)
         c2_stage = stage
         if stage == 2:
-            c2_stage = 1 # Skip Super Long for char 2
+            c2_stage = 1
             
-        draw_warrior(cx - 40 + (frame % 4), wy, c1_stage, True, frame)
-        draw_warrior(cx + 40 - (frame % 4), wy, c2_stage, False, frame)
-        
-        # Clashing shockwaves
-        if (frame % 4) < 2:
-            d.ellipse([cx-15, wy-30, cx+15, wy+10], outline=(255, 255, 255, 150), width=2)
+        draw_warrior(c1_x, wy_base + math.sin(frame*0.2)*20, c1_stage, True, frame)
+        draw_warrior(c2_x, wy_base + math.cos(frame*0.2)*20, c2_stage, False, frame)
+    
+    if season != "wasteland":
+        # ── 7. River ──────────────────────────────────────────────────────────────
+        d.rectangle([0, SLOPE_B, W, H], fill=c["river"] + (255,))
+        rflow = 0 if season == "winter" else frame * 10
+        random.seed(55)
+        for _ in range(W // 5):
+            ox = random.randint(0, W)
+            ry = random.randint(SLOPE_B + 2, H - 2)
+            lw = random.randint(10, 35)
+            lx = (ox - rflow) % W
+            d.line([lx, ry, lx + lw, ry], fill=(255, 255, 255, 110), width=1)
+        if season == "winter":
+            # Ice cracks
+            random.seed(88)
+            for _ in range(W // 30):
+                ix = random.randint(0, W)
+                iy = random.randint(SLOPE_B + 2, H - 2)
+                d.line([ix, iy, ix + random.randint(5, 15), iy + random.randint(-2, 2)],
+                       fill=(200, 230, 255, 150), width=1)
+                       
+        # ── 7.5 River Activities ──────────────────────────────────────────────────
+        if season in ["spring", "summer"]:
+            # People fishing
+            random.seed(999) 
+            for _ in range(3):
+                ox = random.randint(0, W * 2)
+                fx = (ox - shift) % W
+                fy = SLOPE_B - 20
+                # Person sitting
+                d.rectangle([fx, fy, fx+12, fy+20], fill=(100, 150, 200, 255)) # body
+                d.ellipse([fx+2, fy-12, fx+10, fy-4], fill=(141, 85, 36, 255)) # head (skin tone)
+                # Hat for summer
+                if season == "summer":
+                    d.ellipse([fx-5, fy-12, fx+17, fy-8], fill=(220, 200, 100, 255))
+                    d.ellipse([fx+2, fy-16, fx+10, fy-10], fill=(220, 200, 100, 255))
+                # Fishing Rod
+                d.line([fx+10, fy+8, fx+40, fy-20], fill=(60, 40, 20, 255), width=2)
+                # Line
+                line_y = SLOPE_B + 20 + abs((frame % 6) - 3) # bobbing
+                d.line([fx+40, fy-20, fx+40, line_y], fill=(255, 255, 255, 150), width=1)
+                # Bobber
+                d.ellipse([fx+38, line_y-2, fx+42, line_y+2], fill=(255, 50, 50, 255))
+                
+        elif season == "autumn":
+            # Fish jumping
+            random.seed(frame * 17)
+            for _ in range(3):
+                jx = random.randint(0, W)
+                jy = random.randint(SLOPE_B + 20, H - 20)
+                
+                # Simple fish shape
+                d.ellipse([jx, jy-8, jx+16, jy+2], fill=(180, 200, 200, 255)) # Body
+                d.polygon([(jx, jy-3), (jx-6, jy-8), (jx-6, jy+2)], fill=(180, 200, 200, 255)) # Tail
+                
+                # Splashes
+                d.arc([jx-10, jy-5, jx+26, jy+15], start=180, end=0, fill=(255, 255, 255, 200), width=2)
+                d.point((jx+5, jy+5), fill=(255, 255, 255, 255))
+                d.point((jx+12, jy+8), fill=(255, 255, 255, 255))
+                d.point((jx-2, jy+6), fill=(255, 255, 255, 255))
 
-        return img # Return early for wasteland to skip river/avatar/couples
-     # 7. River ──────────────────────────────────────────────────────────────
-    d.rectangle([0, SLOPE_B, W, H], fill=c["river"] + (255,))
-    rflow = 0 if season == "winter" else frame * 10
-    random.seed(55)
-    for _ in range(W // 5):
-        ox = random.randint(0, W)
-        ry = random.randint(SLOPE_B + 2, H - 2)
-        lw = random.randint(10, 35)
-        lx = (ox - rflow) % W
-        d.line([lx, ry, lx + lw, ry], fill=(255, 255, 255, 110), width=1)
-    if season == "winter":
-        # Ice cracks
-        random.seed(88)
-        for _ in range(W // 30):
-            ix = random.randint(0, W)
-            iy = random.randint(SLOPE_B + 2, H - 2)
-            d.line([ix, iy, ix + random.randint(5, 15), iy + random.randint(-2, 2)],
-                   fill=(200, 230, 255, 150), width=1)
-                   
-    # ── 7.5 River Activities ──────────────────────────────────────────────────
-    if season in ["spring", "summer"]:
-        # People fishing
-        random.seed(999) 
-        for _ in range(3):
-            ox = random.randint(0, W * 2)
-            fx = (ox - shift) % W
-            fy = SLOPE_B - 20
-            # Person sitting
-            d.rectangle([fx, fy, fx+12, fy+20], fill=(100, 150, 200, 255)) # body
-            d.ellipse([fx+2, fy-12, fx+10, fy-4], fill=(141, 85, 36, 255)) # head (skin tone)
-            # Hat for summer
-            if season == "summer":
-                d.ellipse([fx-5, fy-12, fx+17, fy-8], fill=(220, 200, 100, 255))
-                d.ellipse([fx+2, fy-16, fx+10, fy-10], fill=(220, 200, 100, 255))
-            # Fishing Rod
-            d.line([fx+10, fy+8, fx+40, fy-20], fill=(60, 40, 20, 255), width=2)
-            # Line
-            line_y = SLOPE_B + 20 + abs((frame % 6) - 3) # bobbing
-            d.line([fx+40, fy-20, fx+40, line_y], fill=(255, 255, 255, 150), width=1)
-            # Bobber
-            d.ellipse([fx+38, line_y-2, fx+42, line_y+2], fill=(255, 50, 50, 255))
-            
-    elif season == "autumn":
-        # Fish jumping
-        random.seed(frame * 17)
-        for _ in range(3):
-            jx = random.randint(0, W)
-            jy = random.randint(SLOPE_B + 20, H - 20)
-            
-            # Simple fish shape
-            d.ellipse([jx, jy-8, jx+16, jy+2], fill=(180, 200, 200, 255)) # Body
-            d.polygon([(jx, jy-3), (jx-6, jy-8), (jx-6, jy+2)], fill=(180, 200, 200, 255)) # Tail
-            
-            # Splashes
-            d.arc([jx-10, jy-5, jx+26, jy+15], start=180, end=0, fill=(255, 255, 255, 200), width=2)
-            d.point((jx+5, jy+5), fill=(255, 255, 255, 255))
-            d.point((jx+12, jy+8), fill=(255, 255, 255, 255))
-            d.point((jx-2, jy+6), fill=(255, 255, 255, 255))
+        # ── 7.6 Couples on slope (spring, summer) ─────────────────────────────────
+        def draw_pixel_heart(hx, hy, size=2, color=(255, 80, 80, 220)):
+            # 7x6 pixel heart grid, each cell = size×size square
+            pattern = [
+                (1,0),(2,0),(4,0),(5,0),
+                (0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),
+                (0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),
+                (1,3),(2,3),(3,3),(4,3),(5,3),
+                (2,4),(3,4),(4,4),
+                (3,5),
+            ]
+            for px, py in pattern:
+                rx = hx + (px - 3) * size
+                ry = hy + (py - 3) * size
+                d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=color)
 
-    # ── 7.6 Couples on slope (spring, summer) ─────────────────────────────────
-    def draw_pixel_heart(hx, hy, size=2, color=(255, 80, 80, 220)):
-        # 7x6 pixel heart grid, each cell = size×size square
-        pattern = [
-            (1,0),(2,0),(4,0),(5,0),
-            (0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),
-            (0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),
-            (1,3),(2,3),(3,3),(4,3),(5,3),
-            (2,4),(3,4),(4,4),
-            (3,5),
-        ]
-        for px, py in pattern:
-            rx = hx + (px - 3) * size
-            ry = hy + (py - 3) * size
-            d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=color)
+        def draw_broken_heart(hx, hy, progress, size=2):
+            # Left half drifts upper-left, right half drifts upper-right
+            left_half = [(0,0),(1,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2),(1,3),(2,3),(2,4)]
+            right_half = [(4,0),(5,0),(3,1),(4,1),(5,1),(6,1),(3,2),(4,2),(5,2),(6,2),(4,3),(5,3),(3,4),(4,4),(3,5)]
+            drift = int(progress * 8 * size)
+            rise  = int(progress * 5 * size)
+            fade  = max(0, int(255 * (1 - progress)))
+            col   = (255, 60, 60, fade)
+            for px, py in left_half:
+                rx = hx + (px - 3) * size - drift
+                ry = hy + (py - 3) * size - rise
+                d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
+            for px, py in right_half:
+                rx = hx + (px - 3) * size + drift
+                ry = hy + (py - 3) * size - rise
+                d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
 
-    def draw_broken_heart(hx, hy, progress, size=2):
-        # Left half drifts upper-left, right half drifts upper-right
-        left_half = [(0,0),(1,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2),(1,3),(2,3),(2,4)]
-        right_half = [(4,0),(5,0),(3,1),(4,1),(5,1),(6,1),(3,2),(4,2),(5,2),(6,2),(4,3),(5,3),(3,4),(4,4),(3,5)]
-        drift = int(progress * 8 * size)
-        rise  = int(progress * 5 * size)
-        fade  = max(0, int(255 * (1 - progress)))
-        col   = (255, 60, 60, fade)
-        for px, py in left_half:
-            rx = hx + (px - 3) * size - drift
-            ry = hy + (py - 3) * size - rise
-            d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
-        for px, py in right_half:
-            rx = hx + (px - 3) * size + drift
-            ry = hy + (py - 3) * size - rise
-            d.rectangle([rx, ry, rx + size - 1, ry + size - 1], fill=col)
+        if season in ["spring", "summer"]:
+            # Fixed couples: one crosses avatar mid-animation, other stays right of screen
+            couple_origins = [W // 2 + 15 * spd, W // 2 + 15 * spd + 450]
+            for ci, ox in enumerate(couple_origins):
+                cpx = (ox - shift + W * 4) % W
+                cpy = ROAD_B + (SLOPE_B - ROAD_B) * 2 // 3
 
-    if season in ["spring", "summer"]:
-        # Fixed couples: one crosses avatar mid-animation, other stays right of screen
-        couple_origins = [W // 2 + 15 * spd, W // 2 + 15 * spd + 450]
-        for ci, ox in enumerate(couple_origins):
-            cpx = (ox - shift + W * 4) % W
-            cpy = ROAD_B + (SLOPE_B - ROAD_B) * 2 // 3
+                skin_c  = (141, 85, 36, 255)
+                dress_c = (255, 160, 185, 255) if season == "spring" else (255, 215, 100, 255)
+                shirt_c = (80,  110, 200, 255) if season == "spring" else (60,  180, 100, 255)
 
-            skin_c  = (141, 85, 36, 255)
-            dress_c = (255, 160, 185, 255) if season == "spring" else (255, 215, 100, 255)
-            shirt_c = (80,  110, 200, 255) if season == "spring" else (60,  180, 100, 255)
+                # -- Couple figures --
+                d.rectangle([cpx - 12, cpy - 16, cpx - 5,  cpy], fill=dress_c)
+                d.ellipse  ([cpx - 13, cpy - 26, cpx - 4,  cpy - 16], fill=skin_c)
+                d.rectangle([cpx + 5,  cpy - 16, cpx + 12, cpy], fill=shirt_c)
+                d.ellipse  ([cpx + 3,  cpy - 26, cpx + 13, cpy - 16], fill=skin_c)
 
-            # -- Couple figures --
-            d.rectangle([cpx - 12, cpy - 16, cpx - 5,  cpy], fill=dress_c)
-            d.ellipse  ([cpx - 13, cpy - 26, cpx - 4,  cpy - 16], fill=skin_c)
-            d.rectangle([cpx + 5,  cpy - 16, cpx + 12, cpy], fill=shirt_c)
-            d.ellipse  ([cpx + 3,  cpy - 26, cpx + 13, cpy - 16], fill=skin_c)
+                # -- Umbrella dome (chord = arc + straight chord, gives flat-bottom dome) --
+                umb_fill  = (255, 190, 210, 240) if season == "spring" else (255, 235, 80, 240)
+                umb_edge  = (220, 100, 140, 255) if season == "spring" else (200, 170, 30, 255)
+                d.chord([cpx - 26, cpy - 54, cpx + 26, cpy - 18],
+                        start=180, end=360, fill=umb_fill, outline=umb_edge)
+                # Scallop bumps along bottom edge of dome
+                for i in range(5):
+                    bx = cpx - 20 + i * 10
+                    d.ellipse([bx - 4, cpy - 22, bx + 4, cpy - 14], fill=umb_fill, outline=umb_edge)
+                # Handle
+                d.line([cpx, cpy - 18, cpx, cpy - 2], fill=(110, 70, 40, 255), width=2)
 
-            # -- Umbrella dome (chord = arc + straight chord, gives flat-bottom dome) --
-            umb_fill  = (255, 190, 210, 240) if season == "spring" else (255, 235, 80, 240)
-            umb_edge  = (220, 100, 140, 255) if season == "spring" else (200, 170, 30, 255)
-            d.chord([cpx - 26, cpy - 54, cpx + 26, cpy - 18],
-                    start=180, end=360, fill=umb_fill, outline=umb_edge)
-            # Scallop bumps along bottom edge of dome
-            for i in range(5):
-                bx = cpx - 20 + i * 10
-                d.ellipse([bx - 4, cpy - 22, bx + 4, cpy - 14], fill=umb_fill, outline=umb_edge)
-            # Handle
-            d.line([cpx, cpy - 18, cpx, cpy - 2], fill=(110, 70, 40, 255), width=2)
-
-            # -- Rising heart from couple: rises 5px per frame, fades out, resets each cycle --
-            h_rise  = (frame * 4) % 50          # 0..50 over 16 frames
-            h_alpha = max(20, 230 - h_rise * 5)
-            h_y     = cpy - 60 - h_rise
-            draw_pixel_heart(cpx, h_y, size=2, color=(255, 80, 110, h_alpha))
+                # -- Rising heart from couple: rises 5px per frame, fades out, resets each cycle --
+                h_rise  = (frame * 4) % 50          # 0..50 over 16 frames
+                h_alpha = max(20, 230 - h_rise * 5)
+                h_y     = cpy - 60 - h_rise
+                draw_pixel_heart(cpx, h_y, size=2, color=(255, 80, 110, h_alpha))
 
     # ── 8. Avatar ─────────────────────────────────────────────────────────────
 
@@ -485,6 +480,7 @@ def draw_scene(season, frame, W=1200, H=256):
         "summer": (0, 191, 255, 255),
         "autumn": (139, 69, 19, 255),
         "winter": (60, 80, 200, 255),
+        "wasteland": (255, 140, 0, 255),
     }
     shirt = shirts[season]
 
@@ -548,60 +544,62 @@ def draw_scene(season, frame, W=1200, H=256):
     d.line([wm_x + 2, wm_y, cx + 6, hy2 + 7], fill=(30, 30, 30, 180), width=1)
 
     # Music notes OR breaking heart depending on proximity to couple
-    near_couple = False
-    couple_prox = 0.0
-    if season in ["spring", "summer"]:
-        spd_local = {"spring": 3, "summer": 6}.get(season, 6)
-        couple_origins_check = [W // 2 + 15 * spd_local, W // 2 + 15 * spd_local + 450]
-        shift_check = frame * spd_local
-        for ox_c in couple_origins_check:
-            cpx_c = (ox_c - shift_check + W * 4) % W
-            d_c = abs(cpx_c - cx)
-            if d_c < 90:
-                near_couple = True
-                couple_prox = (90 - d_c) / 90.0
+    if season != "wasteland":
+        near_couple = False
+        couple_prox = 0.0
+        if season in ["spring", "summer"]:
+            spd_local = {"spring": 3, "summer": 6}.get(season, 6)
+            couple_origins_check = [W // 2 + 15 * spd_local, W // 2 + 15 * spd_local + 450]
+            shift_check = frame * spd_local
+            for ox_c in couple_origins_check:
+                cpx_c = (ox_c - shift_check + W * 4) % W
+                d_c = abs(cpx_c - cx)
+                if d_c < 90:
+                    near_couple = True
+                    couple_prox = (90 - d_c) / 90.0
 
-    if near_couple:
-        # Draw breaking heart above head instead of music notes
-        hx = cx + 14
-        hy_base = hy2 - 18 - int(couple_prox * 10)
-        if couple_prox >= 0.55:
-            # Break: left half drifts left+up, right half drifts right+up
-            bp = min(1.0, (couple_prox - 0.55) / 0.45)
-            drift = int(bp * 10)
-            rise  = int(bp * 6)
-            fade  = max(0, int(220 * (1 - bp)))
-            col   = (255, 60, 60, fade)
-            lh = [(0,0),(1,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2),(1,3),(2,3),(2,4)]
-            rh = [(4,0),(5,0),(3,1),(4,1),(5,1),(6,1),(3,2),(4,2),(5,2),(6,2),(4,3),(5,3),(3,4),(4,4),(3,5)]
-            for px, py in lh:
-                rx = hx + (px - 3) * 2 - drift
-                ry = hy_base + (py - 3) * 2 - rise
-                d.rectangle([rx, ry, rx + 1, ry + 1], fill=col)
-            for px, py in rh:
-                rx = hx + (px - 3) * 2 + drift
-                ry = hy_base + (py - 3) * 2 - rise
-                d.rectangle([rx, ry, rx + 1, ry + 1], fill=col)
+        if near_couple:
+            # Draw breaking heart above head instead of music notes
+            hx = cx + 14
+            hy_base = hy2 - 18 - int(couple_prox * 10)
+            if couple_prox >= 0.55:
+                # Break: left half drifts left+up, right half drifts right+up
+                bp = min(1.0, (couple_prox - 0.55) / 0.45)
+                drift = int(bp * 10)
+                rise  = int(bp * 6)
+                fade  = max(0, int(220 * (1 - bp)))
+                col   = (255, 60, 60, fade)
+                lh = [(0,0),(1,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2),(1,3),(2,3),(2,4)]
+                rh = [(4,0),(5,0),(3,1),(4,1),(5,1),(6,1),(3,2),(4,2),(5,2),(6,2),(4,3),(5,3),(3,4),(4,4),(3,5)]
+                for px, py in lh:
+                    rx = hx + (px - 3) * 2 - drift
+                    ry = hy_base + (py - 3) * 2 - rise
+                    d.rectangle([rx, ry, rx + 1, ry + 1], fill=col)
+                for px, py in rh:
+                    rx = hx + (px - 3) * 2 + drift
+                    ry = hy_base + (py - 3) * 2 - rise
+                    d.rectangle([rx, ry, rx + 1, ry + 1], fill=col)
+            else:
+                # Solid heart rising toward the couple
+                alpha = int(220 * couple_prox)
+                pattern = [(1,0),(2,0),(4,0),(5,0),(0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),
+                           (0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(1,3),(2,3),(3,3),(4,3),(5,3),
+                           (2,4),(3,4),(4,4),(3,5)]
+                for px, py in pattern:
+                    rx = hx + (px - 3) * 2
+                    ry = hy_base + (py - 3) * 2
+                    d.rectangle([rx, ry, rx + 1, ry + 1], fill=(255, 80, 100, alpha))
         else:
-            # Solid heart rising toward the couple
-            alpha = int(220 * couple_prox)
-            pattern = [(1,0),(2,0),(4,0),(5,0),(0,1),(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),
-                       (0,2),(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(1,3),(2,3),(3,3),(4,3),(5,3),
-                       (2,4),(3,4),(4,4),(3,5)]
-            for px, py in pattern:
-                rx = hx + (px - 3) * 2
-                ry = hy_base + (py - 3) * 2
-                d.rectangle([rx, ry, rx + 1, ry + 1], fill=(255, 80, 100, alpha))
-    else:
-        # Normal: music notes float upward
-        for i in range(2):
-            nx_off = 15 + i * 12
-            ny_off = -10 - (frame % 4) * 2 - i * 5
-            nx, ny = cx + nx_off, hy2 + ny_off
-            d.ellipse([nx, ny, nx + 4, ny + 3], fill=(255, 255, 255, 180))
-            d.line([nx + 3, ny + 1, nx + 3, ny - 6], fill=(255, 255, 255, 180), width=1)
-            if i % 2 == 0:
-                d.line([nx + 3, ny - 6, nx + 7, ny - 4], fill=(255, 255, 255, 180), width=1)
+            # Normal: music notes float upward
+            for i in range(2):
+                nx_off = 15 + i * 12
+                ny_off = -10 - (frame % 4) * 2 - i * 5
+                nx, ny = cx + nx_off, hy2 + ny_off
+                d.ellipse([nx, ny, nx + 4, ny + 3], fill=(255, 255, 255, 180))
+                d.line([nx + 3, ny + 1, nx + 3, ny - 6], fill=(255, 255, 255, 180), width=1)
+                if i % 2 == 0:
+                    d.line([nx + 3, ny - 6, nx + 7, ny - 4], fill=(255, 255, 255, 180), width=1)
+
 
     if season == "autumn":
         # Bug-catching net
