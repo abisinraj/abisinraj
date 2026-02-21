@@ -291,70 +291,78 @@ def draw_scene(season, frame, W=1200, H=320):
             suit = (255, 120, 0, 255) if is_char1 else (0, 80, 200, 255)
             skin = (255, 210, 170, 255)
             h_col = hair_colors[char_stage]
-            
-            # Hovering movement (static in air means no X move, but subtle Y bobbing is nice)
-            wy = y + math.sin(f * 0.4 + (0 if is_char1 else math.pi)) * 4
-            dir = 1 if is_char1 else -1
 
-            # 1. Aura (Back layer - wider)
-            random.seed(f + x + 100)
-            for _ in range(12):
-                ax = x + random.randint(-25, 25)
-                ay = wy - random.randint(-15, 55)
-                d.rectangle([ax-2, ay-2, ax+2, ay+2], fill=h_col[:3] + (100,))
+            # Aura intensity grows with stage
+            aura_count = 8 + char_stage * 6
+            aura_range = 18 + char_stage * 8
+            random.seed(f * 7 + int(x))
+            for _ in range(aura_count):
+                ax = x + random.randint(-aura_range, aura_range)
+                ay = y + random.randint(-aura_range - 20, aura_range)
+                d.rectangle([ax-2, ay-2, ax+1, ay+1], fill=h_col[:3] + (100,))
 
-            # 2. Lower Body (Legs in fighting stance)
-            # Belt/Sash
-            d.rectangle([x-6, wy-2, x+6, wy+2], fill=(40, 40, 40, 255))
-            # Left Leg (Diagonal)
-            d.line([x-3, wy, x-12, wy+15], fill=suit, width=7)
-            d.rectangle([x-15, wy+15, x-8, wy+20], fill=(20, 20, 20, 255)) # Boot
-            # Right Leg (Diagonal)
-            d.line([x+3, wy, x+12, wy+15], fill=suit, width=7)
-            d.rectangle([x+8, wy+15, x+15, wy+20], fill=(20, 20, 20, 255)) # Boot
+            # Legs (standing straight, slight apart)
+            d.line([x-4, y, x-6, y+16], fill=suit, width=5)
+            d.rectangle([x-9, y+15, x-3, y+19], fill=(20, 20, 20, 255))
+            d.line([x+4, y, x+6, y+16], fill=suit, width=5)
+            d.rectangle([x+3, y+15, x+9, y+19], fill=(20, 20, 20, 255))
 
-            # 3. Upper Body
-            d.rectangle([x-7, wy-16, x+7, wy-2], fill=suit) # Torso
-            d.ellipse([x-6, wy-27, x+6, wy-16], fill=skin) # Head
+            # Torso
+            d.rectangle([x-7, y-14, x+7, y], fill=suit)
+            # Head
+            d.ellipse([x-5, y-24, x+5, y-14], fill=skin)
 
-            # 4. Arms & Hands (Fighting Stance)
-            # Front arm (bent)
-            d.line([x+dir*7, wy-14, x+dir*18, wy-10], fill=suit, width=5)
-            h1x0, h1x1 = (x+dir*17, x+dir*23) if dir > 0 else (x+dir*23, x+dir*17)
-            d.ellipse([h1x0, wy-12, h1x1, wy-6], fill=skin) # Hand/Fist
-            
-            # Back arm (raised)
-            d.line([x-dir*7, wy-14, x-dir*15, wy-24], fill=suit, width=5)
-            h2x0, h2x1 = (x-dir*17, x-dir*11) if dir < 0 else (x-dir*11, x-dir*17)
-            d.ellipse([h2x0, wy-28, h2x1, wy-22], fill=skin) # Hand/Fist
+            # Arms (down at sides, fists clenched — charge-up pose)
+            d.line([x-7, y-12, x-10, y+2], fill=suit, width=4)
+            d.ellipse([x-12, y+1, x-7, y+6], fill=skin)
+            d.line([x+7, y-12, x+10, y+2], fill=suit, width=4)
+            d.ellipse([x+7, y+1, x+12, y+6], fill=skin)
 
-            # 5. Hair
-            if char_stage == 0: # 1st Yellow (Short)
-                d.polygon([(x-7, wy-26), (x+7, wy-26), (x-5, wy-36), (x, wy-42), (x+5, wy-36)], fill=h_col)
-            elif char_stage == 1: # 2nd Yellow (Slightly longer)
-                d.polygon([(x-8, wy-26), (x+8, wy-26), (x-7, wy-40), (x, wy-48), (x+7, wy-40)], fill=h_col)
-            elif char_stage == 2: # 3rd Yellow (Even longer for Char 1)
+            # Spiky Hair
+            ht = y - 24
+            if char_stage == 0:
+                d.polygon([
+                    (x-7, ht), (x-5, ht-8), (x-2, ht-4),
+                    (x, ht-14), (x+2, ht-4), (x+5, ht-8),
+                    (x+7, ht)
+                ], fill=h_col)
+            elif char_stage == 1:
+                d.polygon([
+                    (x-8, ht), (x-6, ht-12), (x-3, ht-6),
+                    (x, ht-22), (x+3, ht-6), (x+6, ht-12),
+                    (x+8, ht)
+                ], fill=h_col)
+            elif char_stage == 2:
                 if is_char1:
-                    # Massive spiky hair
-                    d.polygon([(x-10, wy-26), (x+10, wy-26), (x-12, wy-55), (x, wy-65), (x+12, wy-55)], fill=h_col)
-                    d.rectangle([x-12, wy-26, x+12, wy+15], fill=h_col) # Hair reaches down
-                else: 
-                    d.polygon([(x-8, wy-26), (x+8, wy-26), (x-7, wy-40), (x, wy-48), (x+7, wy-40)], fill=h_col)
-            elif char_stage >= 3: # 4th Red / 5th Blue
-                d.polygon([(x-7, wy-26), (x+7, wy-26), (x-5, wy-36), (x, wy-42), (x+5, wy-36)], fill=h_col)
+                    d.polygon([
+                        (x-10, ht), (x-8, ht-18), (x-5, ht-10),
+                        (x-2, ht-30), (x, ht-42),
+                        (x+2, ht-30), (x+5, ht-10),
+                        (x+8, ht-18), (x+10, ht)
+                    ], fill=h_col)
+                    for sx in range(-6, 7, 4):
+                        d.line([x+sx, ht, x+sx, y+6], fill=h_col, width=2)
+                else:
+                    d.polygon([
+                        (x-8, ht), (x-6, ht-12), (x-3, ht-6),
+                        (x, ht-22), (x+3, ht-6), (x+6, ht-12),
+                        (x+8, ht)
+                    ], fill=h_col)
+            elif char_stage >= 3:
+                d.polygon([
+                    (x-7, ht), (x-5, ht-8), (x-2, ht-4),
+                    (x, ht-14), (x+2, ht-4), (x+5, ht-8),
+                    (x+7, ht)
+                ], fill=h_col)
 
-        # Draw the two warriors flying static in the sky
-        wy_base = SKY_H - 60
-        c1_x = W // 2 - 180
-        c2_x = W // 2 + 180
-        
-        c1_stage = stage
-        c2_stage = stage
-        if stage == 2:
-            c2_stage = 1
-            
-        draw_warrior(c1_x, wy_base, c1_stage, True, frame)
-        draw_warrior(c2_x, wy_base, c2_stage, False, frame)
+        # Static positions in the sky
+        c1_x = W // 2 - 200
+        c2_x = W // 2 + 200
+        wy = SKY_H - 50
+
+        draw_warrior(c1_x, wy, stage, True, frame)
+        c2_stage = 1 if stage == 2 else stage
+        draw_warrior(c2_x, wy, c2_stage, False, frame)
     
     if season != "wasteland":
         # ── 7. River ──────────────────────────────────────────────────────────────
