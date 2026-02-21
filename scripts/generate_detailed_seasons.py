@@ -310,18 +310,45 @@ def draw_scene(season, frame, W=1200, H=320):
             # Restore random state
             random.setstate(rng_state)
 
-            # --- FIGHTING STANCE (MUSCULAR) ---
-            # Front leg
-            d.line([x+dr*4, y-2, x+dr*16, y+14], fill=suit, width=9)
-            d.line([x+dr*16, y+14, x+dr*19, y+24], fill=suit, width=8)
-            bx0, bx1 = sorted([x+dr*15, x+dr*25])
-            d.rectangle([bx0, y+22, bx1, y+29], fill=(30, 30, 30, 255))
+            # --- FIGHTING STANCE (MUSCULAR, VARIED POSES) ---
+            pose = (f // 3 + (1 if is_char1 else 0)) % 3
 
-            # Back leg
-            d.line([x-dr*4, y-2, x-dr*14, y+16], fill=suit, width=9)
-            d.line([x-dr*14, y+16, x-dr*11, y+24], fill=suit, width=8)
-            bx2, bx3 = sorted([x-dr*16, x-dr*7])
-            d.rectangle([bx2, y+22, bx3, y+29], fill=(30, 30, 30, 255))
+            if pose == 0:
+                # Pose 0: Standard Punch
+                # Front leg
+                d.line([x+dr*4, y-2, x+dr*16, y+14], fill=suit, width=9)
+                d.line([x+dr*16, y+14, x+dr*19, y+24], fill=suit, width=8)
+                bx0, bx1 = sorted([x+dr*15, x+dr*25])
+                d.rectangle([bx0, y+22, bx1, y+29], fill=(30, 30, 30, 255))
+                # Back leg
+                d.line([x-dr*4, y-2, x-dr*14, y+16], fill=suit, width=9)
+                d.line([x-dr*14, y+16, x-dr*11, y+24], fill=suit, width=8)
+                bx2, bx3 = sorted([x-dr*16, x-dr*7])
+                d.rectangle([bx2, y+22, bx3, y+29], fill=(30, 30, 30, 255))
+            elif pose == 1:
+                # Pose 1: High Knee / Block
+                # Front leg (knee up)
+                d.line([x+dr*2, y-2, x+dr*15, y+5], fill=suit, width=9)
+                d.line([x+dr*15, y+5, x+dr*10, y+15], fill=suit, width=8)
+                bx0, bx1 = sorted([x+dr*7, x+dr*15])
+                d.rectangle([bx0, y+13, bx1, y+20], fill=(30, 30, 30, 255))
+                # Back leg (straight down)
+                d.line([x-dr*3, y-2, x-dr*6, y+15], fill=suit, width=9)
+                d.line([x-dr*6, y+15, x-dr*5, y+24], fill=suit, width=8)
+                bx2, bx3 = sorted([x-dr*9, x-dr*1])
+                d.rectangle([bx2, y+22, bx3, y+29], fill=(30, 30, 30, 255))
+            else:
+                # Pose 2: Wide Stance Upper Body Blast / Guard
+                # Front leg
+                d.line([x+dr*6, y-2, x+dr*20, y+12], fill=suit, width=9)
+                d.line([x+dr*20, y+12, x+dr*22, y+24], fill=suit, width=8)
+                bx0, bx1 = sorted([x+dr*18, x+dr*26])
+                d.rectangle([bx0, y+22, bx1, y+29], fill=(30, 30, 30, 255))
+                # Back leg
+                d.line([x-dr*6, y-2, x-dr*20, y+12], fill=suit, width=9)
+                d.line([x-dr*20, y+12, x-dr*22, y+24], fill=suit, width=8)
+                bx2, bx3 = sorted([x-dr*26, x-dr*18])
+                d.rectangle([bx2, y+22, bx3, y+29], fill=(30, 30, 30, 255))
 
             # Torso (Muscular V-shape)
             d.polygon([
@@ -336,16 +363,38 @@ def draw_scene(season, frame, W=1200, H=320):
             # Head
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
-            # Forward arm (punching forward — thick)
-            ex1, ey1 = x + dr*28, y - 12
-            d.line([x+dr*12, y-13, ex1, ey1], fill=suit, width=8)
-            d.ellipse([ex1-5, ey1-5, ex1+5, ey1+5], fill=skin)  # Muscular fist centered on line end
+            if pose == 0:
+                # Forward arm (punching forward — thick)
+                ex1, ey1 = x + dr*28, y - 12
+                d.line([x+dr*12, y-13, ex1, ey1], fill=suit, width=8)
+                d.ellipse([ex1-5, ey1-5, ex1+5, ey1+5], fill=skin)
+                # Guard arm (bent, guarding chest — thick)
+                d.line([x-dr*12, y-13, x-dr*16, y-4], fill=suit, width=8)
+                ex2, ey2 = x - dr*10, y + 2
+                d.line([x-dr*16, y-4, ex2, ey2], fill=suit, width=7)
+                d.ellipse([ex2-4, ey2-4, ex2+4, ey2+4], fill=skin)
+            elif pose == 1:
+                # Both arms defending (crossed high)
+                d.line([x+dr*10, y-13, x+dr*4, y-6], fill=suit, width=8)
+                ex1, ey1 = x-dr*4, y-8
+                d.line([x+dr*4, y-6, ex1, ey1], fill=suit, width=7)
+                d.ellipse([ex1-4, ey1-4, ex1+4, ey1+4], fill=skin)
 
-            # Guard arm (bent, guarding chest — thick)
-            d.line([x-dr*12, y-13, x-dr*16, y-4], fill=suit, width=8)
-            ex2, ey2 = x - dr*10, y + 2
-            d.line([x-dr*16, y-4, ex2, ey2], fill=suit, width=7)
-            d.ellipse([ex2-4, ey2-4, ex2+4, ey2+4], fill=skin)  # Muscular fist centered on line end
+                d.line([x-dr*10, y-13, x, y-4], fill=suit, width=8)
+                ex2, ey2 = x+dr*6, y-6
+                d.line([x, y-4, ex2, ey2], fill=suit, width=7)
+                d.ellipse([ex2-4, ey2-4, ex2+4, ey2+4], fill=skin)
+            else:
+                # Double lower blast/charge
+                d.line([x+dr*12, y-13, x+dr*20, y-2], fill=suit, width=8)
+                ex1, ey1 = x+dr*25, y+5
+                d.line([x+dr*20, y-2, ex1, ey1], fill=suit, width=7)
+                d.ellipse([ex1-4, ey1-4, ex1+4, ey1+4], fill=skin)
+
+                d.line([x-dr*12, y-13, x-dr*20, y-2], fill=suit, width=8)
+                ex2, ey2 = x-dr*25, y+5
+                d.line([x-dr*20, y-2, ex2, ey2], fill=suit, width=7)
+                d.ellipse([ex2-4, ey2-4, ex2+4, ey2+4], fill=skin)
 
             # --- Spiky Hair ---
             ht = y - 28
