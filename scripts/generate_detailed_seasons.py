@@ -238,6 +238,46 @@ def draw_scene(season, frame, W=1200, H=256):
             iy = random.randint(SLOPE_B + 2, H - 2)
             d.line([ix, iy, ix + random.randint(5, 15), iy + random.randint(-2, 2)],
                    fill=(200, 230, 255, 150), width=1)
+                   
+    # ── 7.5 River Activities ──────────────────────────────────────────────────
+    if season in ["spring", "summer"]:
+        # People fishing
+        random.seed(999) 
+        for _ in range(3):
+            ox = random.randint(0, W * 2)
+            fx = (ox - shift) % W
+            fy = SLOPE_B - 20
+            # Person sitting
+            d.rectangle([fx, fy, fx+12, fy+20], fill=(100, 150, 200, 255)) # body
+            d.ellipse([fx+2, fy-12, fx+10, fy-4], fill=(141, 85, 36, 255)) # head (skin tone)
+            # Hat for summer
+            if season == "summer":
+                d.ellipse([fx-5, fy-12, fx+17, fy-8], fill=(220, 200, 100, 255))
+                d.ellipse([fx+2, fy-16, fx+10, fy-10], fill=(220, 200, 100, 255))
+            # Fishing Rod
+            d.line([fx+10, fy+8, fx+40, fy-20], fill=(60, 40, 20, 255), width=2)
+            # Line
+            line_y = SLOPE_B + 20 + abs((frame % 6) - 3) # bobbing
+            d.line([fx+40, fy-20, fx+40, line_y], fill=(255, 255, 255, 150), width=1)
+            # Bobber
+            d.ellipse([fx+38, line_y-2, fx+42, line_y+2], fill=(255, 50, 50, 255))
+            
+    elif season == "autumn":
+        # Fish jumping
+        random.seed(frame * 17)
+        for _ in range(3):
+            jx = random.randint(0, W)
+            jy = random.randint(SLOPE_B + 20, H - 20)
+            
+            # Simple fish shape
+            d.ellipse([jx, jy-8, jx+16, jy+2], fill=(180, 200, 200, 255)) # Body
+            d.polygon([(jx, jy-3), (jx-6, jy-8), (jx-6, jy+2)], fill=(180, 200, 200, 255)) # Tail
+            
+            # Splashes
+            d.arc([jx-10, jy-5, jx+26, jy+15], start=180, end=0, fill=(255, 255, 255, 200), width=2)
+            d.point((jx+5, jy+5), fill=(255, 255, 255, 255))
+            d.point((jx+12, jy+8), fill=(255, 255, 255, 255))
+            d.point((jx-2, jy+6), fill=(255, 255, 255, 255))
 
     # ── 8. Avatar ─────────────────────────────────────────────────────────────
     cx   = W // 2
