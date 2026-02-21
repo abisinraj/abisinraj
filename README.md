@@ -101,10 +101,13 @@ ABISIN RAJ
         <p style="margin:0; font-size:13px; color:#58a6ff;">Upgrading from EDR to SIEM level — researching multi-device monitoring architecture.</p>
       </td>
       <td style="vertical-align:top; width:45%;">
-        <p style="margin:0 0 10px 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25);">screenshots</p>
-        <!-- Replace the src URLs below with your actual screenshot links from the Abisin-Raj/assets repo -->
-        <img src="" width="100%" style="border-radius:8px; margin-bottom:8px; display:block;" />
-        <img src="" width="100%" style="border-radius:8px; display:block;" />
+        <details>
+          <summary style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); cursor:pointer; user-select:none;">screenshots</summary>
+          <br />
+          <!-- Replace the src URLs below with your actual screenshot links from the Abisin-Raj/assets repo -->
+          <img src="" width="100%" style="border-radius:8px; margin-bottom:8px; display:block;" />
+          <img src="" width="100%" style="border-radius:8px; display:block;" />
+        </details>
       </td>
     </tr>
   </table>
@@ -134,10 +137,13 @@ ABISIN RAJ
         <p style="margin:0; font-size:13px; color:#58a6ff;">Actively building — cycle system and 3D progress visualization.</p>
       </td>
       <td style="vertical-align:top; width:45%;">
-        <p style="margin:0 0 10px 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25);">screenshots</p>
-        <!-- Replace the src URLs below with your actual screenshot links from the Abisin-Raj/assets repo -->
-        <img src="" width="100%" style="border-radius:8px; margin-bottom:8px; display:block;" />
-        <img src="" width="100%" style="border-radius:8px; display:block;" />
+        <details>
+          <summary style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); cursor:pointer; user-select:none;">screenshots</summary>
+          <br />
+          <!-- Replace the src URLs below with your actual screenshot links from the Abisin-Raj/assets repo -->
+          <img src="" width="100%" style="border-radius:8px; margin-bottom:8px; display:block;" />
+          <img src="" width="100%" style="border-radius:8px; display:block;" />
+        </details>
       </td>
     </tr>
   </table>
