@@ -347,22 +347,6 @@ def draw_scene(season, frame, W=1200, H=256):
             h_y     = cpy - 60 - h_rise
             draw_pixel_heart(cpx, h_y, size=2, color=(255, 80, 110, h_alpha))
 
-        # -- Heart from avatar when a couple is near centre --
-        avatar_x = W // 2
-        foot_y   = ROAD_B - 8
-        for ox in couple_origins:
-            cpx = (ox - shift + W * 4) % W
-            dist = abs(cpx - avatar_x)
-            if dist < 90:
-                prox = (90 - dist) / 90.0          # 0→1 as couple crosses avatar
-                av_heart_y = foot_y - 20 - int(prox * 28)
-                if prox >= 0.60:
-                    bp = min(1.0, (prox - 0.60) / 0.40)  # 0→1 for break animation
-                    draw_broken_heart(avatar_x, av_heart_y, bp, size=3)
-                else:
-                    draw_pixel_heart(avatar_x, av_heart_y, size=3,
-                                     color=(255, 90, 120, int(240 * prox)))
-
     # ── 8. Avatar ─────────────────────────────────────────────────────────────
 
     cx   = W // 2
