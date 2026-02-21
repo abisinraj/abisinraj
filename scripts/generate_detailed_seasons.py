@@ -310,43 +310,47 @@ def draw_scene(season, frame, W=1200, H=320):
             # Restore random state
             random.setstate(rng_state)
 
-            # --- FIGHTING STANCE ---
-            # Front leg (bent forward toward opponent)
-            # Front leg (bent forward toward opponent)
-            d.line([x+dr*3, y+2, x+dr*14, y+14], fill=suit, width=8)
-            d.line([x+dr*14, y+14, x+dr*18, y+22], fill=suit, width=7)
-            bx0, bx1 = sorted([x+dr*15, x+dr*23])
-            d.rectangle([bx0, y+21, bx1, y+27], fill=(30, 30, 30, 255))
+            # --- FIGHTING STANCE (EXTREMELY MUSCULAR) ---
+            # Front leg (massive)
+            d.line([x+dr*5, y-2, x+dr*18, y+14], fill=suit, width=12)
+            d.line([x+dr*18, y+14, x+dr*20, y+24], fill=suit, width=10)
+            bx0, bx1 = sorted([x+dr*15, x+dr*27])
+            d.rectangle([bx0, y+22, bx1, y+30], fill=(30, 30, 30, 255))
 
-            # Back leg (extended behind)
-            d.line([x-dr*3, y+2, x-dr*12, y+16], fill=suit, width=8)
-            d.line([x-dr*12, y+16, x-dr*10, y+24], fill=suit, width=7)
-            bx2, bx3 = sorted([x-dr*14, x-dr*6])
-            d.rectangle([bx2, y+23, bx3, y+29], fill=(30, 30, 30, 255))
+            # Back leg (massive)
+            d.line([x-dr*5, y-2, x-dr*15, y+16], fill=suit, width=12)
+            d.line([x-dr*15, y+16, x-dr*12, y+24], fill=suit, width=10)
+            bx2, bx3 = sorted([x-dr*18, x-dr*6])
+            d.rectangle([bx2, y+22, bx3, y+30], fill=(30, 30, 30, 255))
 
-            # Torso (V-shape: wide shoulders, narrower waist)
+            # Torso (Huge V-shape)
             d.polygon([
-                (x-12, y-16), (x+12, y-16),  # shoulders
-                (x+8, y+2), (x-8, y+2)       # waist
+                (x-18, y-18), (x+18, y-18),  # massive shoulders
+                (x+10, y+4), (x-10, y+4)     # waist
             ], fill=suit)
 
-            # Shoulder pads
-            d.ellipse([x-15, y-18, x-7, y-10], fill=suit)
-            d.ellipse([x+7, y-18, x+15, y-10], fill=suit)
+            # Chest/Pecs lines (for muscle definition)
+            d.line([x-10, y-10, x, y-6], fill=(0,0,0,100), width=2)
+            d.line([x+10, y-10, x, y-6], fill=(0,0,0,100), width=2)
+            d.line([x, y-6, x, y], fill=(0,0,0,100), width=2) # abs line
+
+            # Huge Shoulder pads (deltoids)
+            d.ellipse([x-24, y-22, x-10, y-8], fill=suit)
+            d.ellipse([x+10, y-22, x+24, y-8], fill=suit)
 
             # Head
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
-            # Forward arm (punching forward — thick)
-            d.line([x+dr*10, y-13, x+dr*26, y-11], fill=suit, width=7)
-            fx0, fx1 = sorted([x+dr*25, x+dr*32])
-            d.ellipse([fx0, y-15, fx1, y-7], fill=skin)  # Big fist
+            # Forward arm (punching forward — super thick)
+            d.line([x+dr*16, y-13, x+dr*34, y-11], fill=suit, width=11)
+            fx0, fx1 = sorted([x+dr*32, x+dr*42])
+            d.ellipse([fx0, y-17, fx1, y-5], fill=skin)  # Gigantic fist
 
-            # Guard arm (bent, guarding chest — thick)
-            d.line([x-dr*10, y-13, x-dr*14, y-5], fill=suit, width=7)
-            d.line([x-dr*14, y-5, x-dr*8, y-1], fill=suit, width=6)
-            gx0, gx1 = sorted([x-dr*10, x-dr*4])
-            d.ellipse([gx0, y-4, gx1, y+2], fill=skin)  # Big fist
+            # Guard arm (bent, guarding chest — super thick)
+            d.line([x-dr*16, y-13, x-dr*20, y-3], fill=suit, width=11)
+            d.line([x-dr*20, y-3, x-dr*12, y+4], fill=suit, width=10)
+            gx0, gx1 = sorted([x-dr*14, x-dr*4])
+            d.ellipse([gx0, y-1, gx1, y+9], fill=skin)  # Gigantic fist
 
             # --- Spiky Hair ---
             ht = y - 28
