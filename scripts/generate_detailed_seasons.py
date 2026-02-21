@@ -287,12 +287,12 @@ def draw_scene(season, frame, W=1200, H=320):
             (60, 160, 255, 255),  # Blue
         ]
         
-        def draw_warrior(x, y, char_stage, is_char1, f):
+        def draw_warrior(x, y, char_stage, is_char1, f, force_dir=None):
             suit = (255, 120, 0, 255) if is_char1 else (0, 80, 200, 255)
             skin = (255, 210, 170, 255)
             h_col = hair_colors[char_stage]
             aura_rgb = h_col[:3]
-            dr = 1 if is_char1 else -1
+            dr = force_dir if force_dir is not None else (1 if is_char1 else -1)
 
             # Save random state
             rng_state = random.getstate()
@@ -337,15 +337,15 @@ def draw_scene(season, frame, W=1200, H=320):
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
             # Forward arm (punching forward — thick)
-            d.line([x+dr*12, y-13, x+dr*28, y-11], fill=suit, width=8)
-            fx0, fx1 = sorted([x+dr*26, x+dr*34])
-            d.ellipse([fx0, y-16, fx1, y-6], fill=skin)  # Muscular fist
+            ex1, ey1 = x + dr*28, y - 12
+            d.line([x+dr*12, y-13, ex1, ey1], fill=suit, width=8)
+            d.ellipse([ex1-5, ey1-5, ex1+5, ey1+5], fill=skin)  # Muscular fist centered on line end
 
             # Guard arm (bent, guarding chest — thick)
             d.line([x-dr*12, y-13, x-dr*16, y-4], fill=suit, width=8)
-            d.line([x-dr*16, y-4, x-dr*10, y+2], fill=suit, width=7)
-            gx0, gx1 = sorted([x-dr*12, x-dr*4])
-            d.ellipse([gx0, y-2, gx1, y+6], fill=skin)  # Muscular fist
+            ex2, ey2 = x - dr*10, y + 2
+            d.line([x-dr*16, y-4, ex2, ey2], fill=suit, width=7)
+            d.ellipse([ex2-4, ey2-4, ex2+4, ey2+4], fill=skin)  # Muscular fist centered on line end
 
             # --- Spiky Hair ---
             ht = y - 28
@@ -384,14 +384,46 @@ def draw_scene(season, frame, W=1200, H=320):
                     (x+6, ht)
                 ], fill=h_col)
 
-        # Static positions in the sky
-        c1_x = W // 2 - 200
-        c2_x = W // 2 + 200
-        wy = SKY_H - 55
-
-        draw_warrior(c1_x, wy, stage, True, frame)
-        c2_stage = 1 if stage == 2 else stage
-        draw_warrior(c2_x, wy, c2_stage, False, frame)
+        # --- Fast Teleporting Combat in the Sky ---
+        rng_state = random.getstate()
+        
+        # New pose/position every 3 frames (stay static for 2 frames, invisible for 1)
+        pose_seed = frame // 3
+        random.seed(pose_seed + 888)
+        
+        # Make them invisible 1 out of every 3 frames to look incredibly fast
+        is_visible = (frame % 3) != 2 
+        
+        if is_visible:
+            # Pick a random clash point
+            cx = random.randint(250, W - 250)
+            cy = random.randint(60, SKY_H - 60)
+            
+            # Distance between them
+            dist = random.randint(70, 220)
+            
+            # 50% chance to swap sides
+            swapped = random.random() > 0.5
+            dr1 = -1 if swapped else 1
+            dr2 = 1 if swapped else -1
+            
+            # Calculate positions relative to clash point
+            c1_x = cx - (dist // 2) * dr1
+            c2_x = cx - (dist // 2) * dr2
+            
+            # Draw with small vertical offsets
+            draw_warrior(c1_x, cy + random.randint(-15, 15), stage, True, frame, force_dir=dr1)
+            c2_stage = 1 if stage == 2 else stage
+            draw_warrior(c2_x, cy + random.randint(-15, 15), c2_stage, False, frame, force_dir=dr2)
+            
+            # If they are very close during this frame, draw impact flash
+            if dist <= 120 and (frame % 3) == 0:
+                for _ in range(35):
+                    px = cx + random.randint(-40, 40)
+                    py = cy + random.randint(-40, 40)
+                    d.rectangle([px-2, py-2, px+1, py+1], fill=(255, 255, 255, random.randint(150, 255)))
+        
+        random.setstate(rng_state)
     
     if season != "wasteland":
         # ── 7. River ──────────────────────────────────────────────────────────────
