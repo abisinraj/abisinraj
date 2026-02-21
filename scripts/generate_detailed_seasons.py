@@ -863,36 +863,36 @@ def draw_scene(season, frame, W=1200, H=320):
         # ── Greeting Speech Bubble ──
         hour = datetime.now().hour
         
-        # Unique 24-hour greetings with additional dialog
+        # Unique 24-hour thematic dialogs
         # Format: {hour: (Base Greeting, Additional Dialog)}
         hour_data = {
-            0: ("Midnight patrol...", "Wasteland never sleeps."),
-            1: ("Too early for training...", "Stay in the shadows."),
-            2: ("Dead silence...", "Just the wind and me."),
-            3: ("Ghostly hour...", "Shadows are moving."),
-            4: ("Dawn is near...", "Searching for light."),
-            5: ("Early start...", "Gotta keep moving."),
-            6: ("Good Morning!", "Ready to train?"),
-            7: ("Morning rays...", "Heat's building up."),
-            8: ("Stay focused.", "The waste is unforgiving."),
-            9: ("Morning patrol...", "Scavenging for parts."),
-            10: ("Sun's high already.", "Stay hydrated out here."),
-            11: ("Almost noon...", "Finding some shade."),
-            12: ("Good Afternoon!", "The heat is a trial."),
-            13: ("Scorching sun...", "Efficiency matters."),
-            14: ("Peak heat.", "Test of endurance."),
-            15: ("Afternoon dust...", "Eyes on the horizon."),
-            16: ("Day's halfway done.", "Results are coming."),
-            17: ("Sun's dipping.", "Glow of the ruins."),
-            18: ("Good Evening!", "Sky looks like amber."),
-            19: ("Sunset vibes...", "Night's approaching."),
-            20: ("Twilight wanderer.", "Cooling down at last."),
-            21: ("Dusk patrol...", "Fire up the lantern."),
-            22: ("Night falls fast.", "Watch your step."),
-            23: ("End of the day.", "Reflect and reboot.")
+            0: ("Late night training?", "The power level is rising."),
+            1: ("Too early for this...", "They never stop clashing."),
+            2: ("Shadow boxing in the dark.", "Can you feel the vibration?"),
+            3: ("The peak of night.", "A warrior's mind never rests."),
+            4: ("Dawn's coming...", "The wasteland reveals all."),
+            5: ("Early start, visitor?", "Watch your step out here."),
+            6: ("Good Morning!", "A fresh start for the grind."),
+            7: ("Morning light...", "The fight is just beginning."),
+            8: ("Relentless energy.", "Stay focused on the path."),
+            9: ("Scouting the area...", "You picked a rough day to visit."),
+            10: ("Heat's rising.", "Power is nothing without control."),
+            11: ("Almost noon.", "The desert tests your spirit."),
+            12: ("Good Afternoon!", "Intense heat, intense battle."),
+            13: ("Sun's at its peak.", "Observe their technique."),
+            14: ("Wasteland trial.", "Growth comes from struggle."),
+            15: ("Dust in the wind...", "A true warrior adapts."),
+            16: ("Evening approaches.", "Still pushing the limits."),
+            17: ("The sky is changing.", "Endurance is the key."),
+            18: ("Good Evening!", "The training continues."),
+            19: ("Sunset glow...", "Nature's a warrior too."),
+            20: ("Twilight stillness.", "Listening to the strikes."),
+            21: ("Night patrol...", "Even in dark, we see."),
+            22: ("Wasteland never sleeps.", "Don't lose your focus."),
+            23: ("Reflecting on the day.", "Tomorrow, we go further.")
         }
         
-        base, extra = hour_data.get(hour, ("Hello!", "Keep walking."))
+        base, extra = hour_data.get(hour, ("Hello visitor.", "Keep on walking."))
         
         # Alternate greeting every 8 frames (since we have 16 frames total)
         greeting = base if frame < 8 else extra
