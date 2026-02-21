@@ -363,6 +363,18 @@ def draw_scene(season, frame, W=1200, H=320):
             # Head
             d.ellipse([x-6, y-28, x+6, y-16], fill=skin)
 
+            # Expression (Angry eyes, yelling mouth)
+            # Eyes (slanted down toward the center)
+            if dr > 0:  # facing right
+                d.line([x-2, y-24, x+1, y-23], fill=(0,0,0,255), width=1) # left eye
+                d.line([x+3, y-23, x+5, y-24], fill=(0,0,0,255), width=1) # right eye
+            else:       # facing left
+                d.line([x-5, y-24, x-3, y-23], fill=(0,0,0,255), width=1) # left eye
+                d.line([x-1, y-23, x+2, y-24], fill=(0,0,0,255), width=1) # right eye
+            
+            # Mouth (open yell)
+            d.rectangle([x+dr*1, y-19, x+dr*3, y-17], fill=(50, 0, 0, 255))
+
             if pose == 0:
                 # Forward arm (punching forward — thick)
                 ex1, ey1 = x + dr*28, y - 12
@@ -460,17 +472,44 @@ def draw_scene(season, frame, W=1200, H=320):
             c1_x = cx - (dist // 2) * dr1
             c2_x = cx - (dist // 2) * dr2
             
-            # Draw with small vertical offsets
+            # Draw warriors with small vertical offsets
             draw_warrior(c1_x, cy + random.randint(-15, 15), stage, True, frame, force_dir=dr1)
             c2_stage = 1 if stage == 2 else stage
             draw_warrior(c2_x, cy + random.randint(-15, 15), c2_stage, False, frame, force_dir=dr2)
             
-            # If they are very close during this frame, draw impact flash
+            # Combat effects depending on distance
             if dist <= 120 and (frame % 3) == 0:
-                for _ in range(35):
-                    px = cx + random.randint(-40, 40)
-                    py = cy + random.randint(-40, 40)
-                    d.rectangle([px-2, py-2, px+1, py+1], fill=(255, 255, 255, random.randint(150, 255)))
+                # Close quarters: physical impact flash (hit!)
+                flash_r = random.randint(30, 60)
+                # Draw starburst
+                d.polygon([
+                    (cx, cy - flash_r), (cx + flash_r//4, cy - flash_r//4),
+                    (cx + flash_r, cy), (cx + flash_r//4, cy + flash_r//4),
+                    (cx, cy + flash_r), (cx - flash_r//4, cy + flash_r//4),
+                    (cx - flash_r, cy), (cx - flash_r//4, cy - flash_r//4)
+                ], fill=(255, 255, 255, 200))
+                # Inner blast
+                d.ellipse([cx-15, cy-15, cx+15, cy+15], fill=(255, 255, 0, 255))
+            elif dist > 140 and (frame % 3) == 0:
+                # Long range: Ki blast!
+                if random.random() > 0.5:
+                    # Blast from Char 1 to Char 2
+                    blast_col = hair_colors[stage]
+                    d.line([c1_x + dr1*20, cy, cx + dr1*40, cy], fill=blast_col[:3] + (200,), width=12)
+                    d.line([c1_x + dr1*20, cy, cx + dr1*40, cy], fill=(255,255,255,255), width=6)
+                    # Blast head
+                    bx = cx + dr1*40
+                    d.ellipse([bx-12, cy-12, bx+12, cy+12], fill=blast_col[:3] + (255,))
+                    d.ellipse([bx-6, cy-6, bx+6, cy+6], fill=(255,255,255,255))
+                else:
+                    # Blast from Char 2 to Char 1
+                    blast_col = hair_colors[c2_stage]
+                    d.line([c2_x + dr2*20, cy, cx + dr2*40, cy], fill=blast_col[:3] + (200,), width=12)
+                    d.line([c2_x + dr2*20, cy, cx + dr2*40, cy], fill=(255,255,255,255), width=6)
+                    # Blast head
+                    bx = cx + dr2*40
+                    d.ellipse([bx-12, cy-12, bx+12, cy+12], fill=blast_col[:3] + (255,))
+                    d.ellipse([bx-6, cy-6, bx+6, cy+6], fill=(255,255,255,255))
         
         random.setstate(rng_state)
     
