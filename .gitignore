@@ -1,3 +1,8 @@
 .vscode/settings.json
 tetris_light_local.gif
 tetris_dark_local.gif
+test_new.log
+test_old.log
+.gitignore
+dist/test.gif
+status.txt
