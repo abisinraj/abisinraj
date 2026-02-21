@@ -660,7 +660,7 @@ def draw_scene(season, frame, W=1200, H=320):
         if season == "summer":
             # Runs very fast across the screen (left to right)
             cap_x = -150 + frame * 105
-            cap_y = ROAD_B + 10
+            cap_y = ROAD_B - 20  # Positioned "behind" the avatar, which means passing on his left
             
             if -50 < cap_x < W + 100:
                 # Legs running (fast)
@@ -668,29 +668,28 @@ def draw_scene(season, frame, W=1200, H=320):
                 r_leg_x = 15 * math.sin(run_t * 2 * math.pi)
                 l_leg_x = 15 * math.sin((run_t + 0.5) * 2 * math.pi)
                 
-                d.line([cap_x, cap_y-8, cap_x + int(r_leg_x), cap_y+12], fill=(30, 40, 160, 255), width=7)
-                d.line([cap_x, cap_y-8, cap_x + int(l_leg_x), cap_y+12], fill=(30, 40, 160, 255), width=7)
+                # Blue Jeans
+                d.line([cap_x, cap_y-8, cap_x + int(r_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
+                d.line([cap_x, cap_y-8, cap_x + int(l_leg_x), cap_y+12], fill=(50, 70, 140, 255), width=7)
                 
-                # Boots
-                d.rectangle([cap_x + int(r_leg_x) - 4, cap_y+5, cap_x + int(r_leg_x) + 4, cap_y+12], fill=(160, 30, 30, 255))
-                d.rectangle([cap_x + int(l_leg_x) - 4, cap_y+5, cap_x + int(l_leg_x) + 4, cap_y+12], fill=(160, 30, 30, 255))
+                # Running Shoes
+                d.rectangle([cap_x + int(r_leg_x) - 4, cap_y+5, cap_x + int(r_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
+                d.rectangle([cap_x + int(l_leg_x) - 4, cap_y+5, cap_x + int(l_leg_x) + 4, cap_y+12], fill=(40, 40, 40, 255))
 
-                # Body (Blue uniform)
-                d.rectangle([cap_x-9, cap_y-25, cap_x+7, cap_y-8], fill=(30, 40, 160, 255))
-                # Star on chest
-                d.point((cap_x-1, cap_y-18), fill=(255, 255, 255, 255))
+                # Body (Bland Grey T-Shirt)
+                d.rectangle([cap_x-9, cap_y-25, cap_x+7, cap_y-8], fill=(180, 180, 180, 255))
+                # Arms swinging
+                arm_x = cap_x - int(10 * math.sin(run_t * 2 * math.pi))
+                d.line([cap_x, cap_y-20, arm_x, cap_y-5], fill=(255, 210, 170, 255), width=4)
                 
-                # Head (Blue helmet)
-                d.ellipse([cap_x-6, cap_y-36, cap_x+6, cap_y-23], fill=(30, 40, 160, 255))
-                d.ellipse([cap_x-4, cap_y-30, cap_x+6, cap_y-23], fill=(255, 210, 170, 255)) # Face peeking out
-                
-                # Shield swinging on the arm facing us
-                shield_x = cap_x + int(8 * math.sin((run_t + 0.25) * 2 * math.pi))
-                shield_y = cap_y - 14
-                d.ellipse([shield_x-9, shield_y-9, shield_x+9, shield_y+9], fill=(200, 30, 30, 255))
-                d.ellipse([shield_x-6, shield_y-6, shield_x+6, shield_y+6], fill=(240, 240, 240, 255))
-                d.ellipse([shield_x-3, shield_y-3, shield_x+3, shield_y+3], fill=(30, 40, 160, 255))
-                d.point((shield_x, shield_y), fill=(255, 255, 255, 255)) # tiny star center
+                # Head (Face)
+                d.ellipse([cap_x-5, cap_y-36, cap_x+6, cap_y-23], fill=(255, 210, 170, 255))
+                # Blonde Hair
+                d.polygon([
+                    (cap_x-6, cap_y-33), (cap_x-2, cap_y-38), 
+                    (cap_x+5, cap_y-37), (cap_x+7, cap_y-30),
+                    (cap_x+3, cap_y-34), (cap_x-3, cap_y-34)
+                ], fill=(230, 200, 80, 255))
                 
                 # Dialog box "On your left"
                 # Showing it only when he's reasonably close to the center
