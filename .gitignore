@@ -17,3 +17,4 @@ tetris_latest.gif
 .gitignore
 tetris_final_fix.gif
 dist/
+test_time.py

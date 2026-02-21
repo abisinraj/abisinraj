@@ -3,11 +3,24 @@ from pathlib import Path
 import random
 import os
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 def hex_to_rgb(h):
     h = h.lstrip('#')
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+
+# ─── TIME HELPER ─────────────────────────────────────────────────────────────
+def get_current_hour():
+    # Allow overriding timezone offset via environment variable (e.g., "5.5" for +05:30)
+    offset = os.environ.get("TIMEZONE_OFFSET")
+    if offset is not None:
+        try:
+            tz = timezone(timedelta(hours=float(offset)))
+            return datetime.now(tz).hour
+        except (ValueError, TypeError):
+            pass
+    return datetime.now().hour
 
 # ─── BANNER: 1200 × 256 ───────────────────────────────────────────────────────
 def draw_scene(season, frame, W=1200, H=320):
@@ -45,7 +58,7 @@ def draw_scene(season, frame, W=1200, H=320):
         spd = 3  # Serene pace for sakura
     shift = frame * spd
 
-    hour = datetime.now().hour
+    hour = get_current_hour()
     
     # --- Time-based Atmosphere Adjustments ---
     # Dawn: 5-7, Day: 8-16, Sunset: 17-19, Night: 20-4
@@ -906,7 +919,7 @@ def draw_scene(season, frame, W=1200, H=320):
 
     if season == "wasteland":
         # ── Greeting Speech Bubble ──
-        hour = datetime.now().hour
+        hour = get_current_hour()
         
         # Unique 24-hour thematic dialogs
         # Format: {hour: (Base Greeting, Additional Dialog)}
