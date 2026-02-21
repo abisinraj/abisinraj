@@ -47,22 +47,6 @@ ABISIN RAJ
   <img height="160" src="https://streak-stats.demolab.com/?user=Abisin-Raj&theme=tokyonight&hide_border=true&background=0d1117&ring=58a6ff&fire=ff6b6b&currStreakLabel=c9d1d9" />
 </div>
 
-<div style="margin-top:20px;"></div>
-
-<!-- WakaTime -->
-<div style="
-    max-width:900px;
-    padding:28px 32px;
-    background: rgba(255,255,255,0.05);
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(12px);
-    margin:auto;
-    text-align:center;
-">
-  <img width="100%" src="https://github-readme-stats-fast.vercel.app/api/wakatime?username=Abisin-Raj&theme=tokyonight&hide_border=true&bg_color=0d1117&title_color=c9d1d9&text_color=8b949e&layout=compact" />
-</div>
-
 <div style="margin-top:40px;"></div>
 
 <!-- Currently Building -->
